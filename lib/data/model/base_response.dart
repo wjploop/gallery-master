@@ -1,4 +1,5 @@
-import 'package:gallery/data/model/Page.dart';
+import 'package:gallery/data/model/category.dart';
+import 'package:gallery/data/model/page.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'base_response.g.dart';
@@ -23,8 +24,8 @@ class _Converter<T> implements JsonConverter<T, dynamic> {
 
   @override
   T fromJson(dynamic json) {
-    if(json is List) {
-      return json.map((e) => null)
+    if (json is List) {
+      return json.map((e) => Category.fromJson(e)).toList() as T;
     }
     if (json is Map<String, dynamic> && json["type"] == "page") {
       return Page.fromJson(json) as T;

@@ -1,5 +1,5 @@
-import 'package:gallery/data/model/category.dart' as C;
-import 'package:gallery/data/model/image.dart' as I;
+import 'package:gallery/data/model/category.dart';
+import 'package:gallery/data/model/image.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'page.g.dart';
@@ -28,9 +28,9 @@ class _ContentConverter<T> implements JsonConverter<T, dynamic> {
       var type = json["type"];
       dynamic res;
       if (type == "image") {
-        res = I.Image.fromJson(json);
+        res = Image.fromJson(json);
       } else if (type == "category") {
-        res = C.Category.fromJson(json);
+        res = Category.fromJson(json);
       }
       return res as T;
     }
