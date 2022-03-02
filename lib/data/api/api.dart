@@ -9,7 +9,7 @@ import 'package:retrofit/http.dart';
 
 part 'api.g.dart';
 
-@RestApi(baseUrl: "http://172.18.208.1/image")
+@RestApi(baseUrl: "http://150.158.92.41/image")
 abstract class Api {
   factory Api(Dio dio, {String baseUrl}) = _Api;
 
@@ -20,5 +20,5 @@ abstract class Api {
   Future<BaseResponse<Page<Tag>>> tags();
 
   @GET("/images")
-  Future<BaseResponse<Page<Image>>> images();
+  Future<BaseResponse<Page<ImageModel>>> images();
 }

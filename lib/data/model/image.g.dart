@@ -6,7 +6,7 @@ part of 'image.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Image _$ImageFromJson(Map<String, dynamic> json) => Image(
+ImageModel _$ImageModelFromJson(Map<String, dynamic> json) => ImageModel(
       id: json['id'] as int,
       tagId: json['tagId'] as int,
       tagName: json['tagName'] as String,
@@ -16,7 +16,8 @@ Image _$ImageFromJson(Map<String, dynamic> json) => Image(
       currentUrl: json['currentUrl'] as String?,
     );
 
-Map<String, dynamic> _$ImageToJson(Image instance) => <String, dynamic>{
+Map<String, dynamic> _$ImageModelToJson(ImageModel instance) =>
+    <String, dynamic>{
       'id': instance.id,
       'tagId': instance.tagId,
       'tagName': instance.tagName,

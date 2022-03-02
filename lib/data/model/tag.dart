@@ -13,4 +13,9 @@ class Tag {
   factory Tag.fromJson(dynamic json) => _$TagFromJson(json);
 
   toJson() => _$TagToJson(this);
+
+  @override
+  String toString() {
+    return 'Tag{type: $type, id: $id, name: $name}';
+  }
 }

@@ -10,7 +10,7 @@ part of 'api.dart';
 
 class _Api implements Api {
   _Api(this._dio, {this.baseUrl}) {
-    baseUrl ??= 'http://172.18.208.1/image';
+    baseUrl ??= 'http://150.158.92.41/image';
   }
 
   final Dio _dio;
@@ -50,18 +50,18 @@ class _Api implements Api {
   }
 
   @override
-  Future<BaseResponse<Page<Image>>> images() async {
+  Future<BaseResponse<Page<ImageModel>>> images() async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<BaseResponse<Page<Image>>>(
+        _setStreamType<BaseResponse<Page<ImageModel>>>(
             Options(method: 'GET', headers: _headers, extra: _extra)
                 .compose(_dio.options, '/images',
                     queryParameters: queryParameters, data: _data)
                 .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = BaseResponse<Page<Image>>.fromJson(_result.data!);
+    final value = BaseResponse<Page<ImageModel>>.fromJson(_result.data!);
     return value;
   }
 

@@ -13,4 +13,9 @@ class Category {
   factory Category.fromJson(dynamic json) => _$CategoryFromJson(json);
 
   toJson() => _$CategoryToJson(this);
+
+  @override
+  String toString() {
+    return 'Category{type: $type, id: $id, name: $name}';
+  }
 }

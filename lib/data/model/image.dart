@@ -10,7 +10,7 @@ part 'image.g.dart';
 
 
 @JsonSerializable()
-class Image {
+class ImageModel {
   int id;
   int tagId;
   String tagName;
@@ -19,7 +19,7 @@ class Image {
   String? originUrl;
   String? currentUrl;
 
-  Image({
+  ImageModel({
       required this.id,
       required this.tagId,
       required this.tagName,
@@ -28,8 +28,12 @@ class Image {
       this.originUrl, 
       this.currentUrl});
 
-  factory Image.fromJson(dynamic json) => _$ImageFromJson(json);
+  factory ImageModel.fromJson(dynamic json) => _$ImageModelFromJson(json);
 
-  Map<String, dynamic> toJson() => _$ImageToJson(this);
+  Map<String, dynamic> toJson() => _$ImageModelToJson(this);
 
+  @override
+  String toString() {
+    return 'Image{id: $id, tagId: $tagId, tagName: $tagName, categoryId: $categoryId, categoryName: $categoryName, originUrl: $originUrl, currentUrl: $currentUrl}';
+  }
 }

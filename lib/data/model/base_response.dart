@@ -27,8 +27,11 @@ class _Converter<T> implements JsonConverter<T, dynamic> {
     if (json is List) {
       return json.map((e) => Category.fromJson(e)).toList() as T;
     }
-    if (json is Map<String, dynamic> && json["type"] == "page") {
-      return Page.fromJson(json) as T;
+    if (json is Map<String, dynamic>) {
+      if (!json.containsKey("type")) {
+        // page 没有type
+        return Page.fromJson(json) as T;
+      }
     }
     return json as T;
   }
