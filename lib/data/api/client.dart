@@ -1,9 +1,9 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
-import 'package:gallery/data/model/base_response.dart';
-import 'package:gallery/data/model/category.dart';
-import 'package:gallery/data/model/image.dart';
-import 'package:gallery/data/model/page.dart';
-import 'package:gallery/data/model/tag.dart';
+import 'package:gallery/data/model/resp_category.dart';
+import 'package:gallery/data/model/resp_image.dart';
+import 'package:gallery/data/model/resp_tag.dart';
 
 class Client {
   static final Client _client = Client._internal();
@@ -22,18 +22,21 @@ class Client {
     ));
   }
 
-  Future<BaseResponse<List<Category>>> categories() async {
-    var res = await _dio.get("categories");
-    return BaseResponse<List<Category>>.fromJson(res.data);
+  Future<RespCategory> categories() async {
+    var resp = await _dio.get("categories");
+    return RespCategory.fromJson(resp.data);
   }
 
-  Future<BaseResponse<Page<Tag>>> tags() async {
-   var res = await _dio.get("tags");
-   return BaseResponse<Page<Tag>>.fromJson(res.data);
+  Future<RespTag> tags() async {
+    var resp = await _dio.get("tags");
+    return RespTag.fromJson(resp.data);
   }
 
-  Future<BaseResponse<Page<ImageModel>>> images() async{
-    var res = await _dio.get("images");
-    return BaseResponse<Page<ImageModel>>.fromJson(res.data);
+  Future<RespImage> images(
+      int categoryId, int page) async {
+    var resp = await _dio.get("images",
+        queryParameters: {"categoryId": categoryId, "page": page});
+    return RespImage.fromJson(resp.data);
+
   }
 }

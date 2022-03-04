@@ -1,14 +1,12 @@
 import 'dart:math';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery/data/api/api.dart';
 import 'package:gallery/data/api/client.dart';
-import 'package:gallery/data/model/category.dart';
+import 'package:gallery/data/model/resp_category.dart';
 import 'package:gallery/page/photo_grid.dart';
-import 'package:logger/logger.dart';
 
-final logger = Logger();
+import '../util/logger.dart';
+
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -21,32 +19,26 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-
-    logger.i("hello");
     initData();
   }
 
-  List<Category> categories = [];
+  List<CategoryModel> categories = [];
 
   void initData() async {
-    // var dio = Dio();
-    // var api = Api(dio);
-    // api.categories().then((value) => logger.i(value));
-    // api.tags().then((value) => logger.i(value));
-    // api.images().then((value) => logger.i(value));
+
     var client = Client();
 
     client.categories().then((value) {
       logger.i(value.data);
       setState(() {
-        categories.addAll(value.data);
+        categories.addAll(value.data!);
       });
     });
 
     client.tags().then((value) => {logger.i(value.data)});
-
-    client.images().then((value) => {logger.i(value.data)});
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -72,4 +64,16 @@ class _HomeState extends State<Home> {
           ),
         ));
   }
+}
+
+class A{}
+
+class B extends A{}
+
+void add(Iterable<A> list) {
+
+}
+void main(){
+  List<B> list = [];
+  add(list);
 }
