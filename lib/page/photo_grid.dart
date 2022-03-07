@@ -57,7 +57,8 @@ class _PhotoGridState extends State<PhotoGrid>
               itemCount: items.length,
               controller: _scrollController,
               itemBuilder: (context, index) {
-                return ItemImage(imageModel: items[index]);
+                return ItemImage(imageModel:
+                items[index]);
               }),
           onRefresh: _onRefresh);
     }
