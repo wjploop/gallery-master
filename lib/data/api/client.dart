@@ -37,6 +37,12 @@ class Client {
     return RespImage.fromJson(resp.data);
   }
 
+  Future<RespImage> imagesByTagId(int tagId, int page, int size) async {
+    var resp = await _dio.get("images",
+        queryParameters: {"tagId": tagId, "page": page, "size": size});
+    return RespImage.fromJson(resp.data);
+  }
+
   Future<RespTagsByImageId> tagsByImageId(int imageId) async {
     var resp = await _dio
         .get("tags_by_image_id", queryParameters: {"imageId": imageId});

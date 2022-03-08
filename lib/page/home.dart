@@ -1,12 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:gallery/data/api/client.dart';
 import 'package:gallery/data/model/resp_category.dart';
 import 'package:gallery/page/photo_grid.dart';
 
 import '../util/logger.dart';
-
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -25,7 +22,6 @@ class _HomeState extends State<Home> {
   List<CategoryModel> categories = [];
 
   void initData() async {
-
     var client = Client();
 
     client.categories().then((value) {
@@ -38,14 +34,13 @@ class _HomeState extends State<Home> {
     client.tags().then((value) => {logger.i(value.data)});
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
         length: categories.length,
         child: Scaffold(
           appBar: AppBar(
+            title: Text("萝卜壁纸"),
               bottom: TabBar(
             isScrollable: true,
             tabs: categories
@@ -56,24 +51,11 @@ class _HomeState extends State<Home> {
           )),
           body: TabBarView(
             children: categories
-                .map((e) => Container(
-                        child: PhotoGrid(
+                .map((e) => PhotoGrid(
                       category: e,
-                    )))
+                    ))
                 .toList(),
           ),
         ));
   }
-}
-
-class A{}
-
-class B extends A{}
-
-void add(Iterable<A> list) {
-
-}
-void main(){
-  List<B> list = [];
-  add(list);
 }

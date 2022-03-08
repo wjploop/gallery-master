@@ -45,7 +45,7 @@ class Data {
       this.type,});
 
   Data.fromJson(dynamic json) {
-    name = json['name'];
+    name = json['name']?.replaceAll("\n","");
     id = json['id'];
     type = json['type'];
   }

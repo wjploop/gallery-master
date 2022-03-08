@@ -206,8 +206,10 @@ class Tag {
     this.type,
   });
 
+  Tag.instance(this.id, this.name);
+
   Tag.fromJson(dynamic json) {
-    name = json['name'];
+    name = json['name'].replaceAll("\n", "");
     id = json['id'];
     type = json['type'];
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gallery/page/ImageByTagScreen.dart';
 import 'package:gallery/page/home.dart';
 
 void main() {
@@ -14,10 +15,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.deepPurple,
+        secondaryHeaderColor: Colors.orange,
       ),
       home: Home(),
+      routes: {ImageByTagScreen.routeName: (context) => ImageByTagScreen()},
     );
   }
 }
