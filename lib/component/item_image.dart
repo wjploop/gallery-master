@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:gallery/data/api/client.dart';
-import 'package:gallery/data/model/resp_image.dart';
-import 'package:gallery/page/ImageByTagScreen.dart';
+import 'package:gallery/data/entity/resp_image.dart';
+import 'package:gallery/screen/ImageByTagScreen.dart';
 
-import '../data/model/resp_tag.dart';
+import '../data/entity//resp_tag.dart';
 
 class ItemImage extends StatefulWidget {
-  final ImageModel imageModel;
+  final ImageEntity imageModel;
 
   const ItemImage({Key? key, required this.imageModel}) : super(key: key);
 
@@ -19,9 +19,12 @@ class _ItemImageState extends State<ItemImage> {
   bool show = false;
   List<Widget> tags = [];
 
+  bool shouldUpdate = false;
+
   @override
   void initState() {
     super.initState();
+    shouldUpdate = true;
 
     Client().tagsByImageId(widget.imageModel.id!).then((value) {
       value.data?.forEach((t) {
@@ -33,7 +36,7 @@ class _ItemImageState extends State<ItemImage> {
                       RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18))),
                   backgroundColor: MaterialStateProperty.resolveWith(
-                          (states) => Colors.white.withOpacity(0.5))),
+                      (states) => Colors.white.withOpacity(0.5))),
               onPressed: () {
                 Navigator.of(context).pushNamedAndRemoveUntil(
                     ImageByTagScreen.routeName, ModalRoute.withName('/'),
@@ -42,15 +45,25 @@ class _ItemImageState extends State<ItemImage> {
               child: Text(
                 t.name!,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, backgroundColor:Colors.grey
-                    .withOpacity(0.5),color: Colors.white),
+                style: TextStyle(
+                    fontSize: 12,
+                    backgroundColor: Colors.grey.withOpacity(0.5),
+                    color: Colors.white),
               )),
         );
-        setState(() {
-          tags.add(tag);
-        });
+        tags.add(tag);
+        if (shouldUpdate) {
+          setState(() {});
+        }
       });
     });
+  }
+
+  @override
+  void dispose() {
+    shouldUpdate = false;
+
+    super.dispose();
   }
 
   @override
@@ -59,12 +72,12 @@ class _ItemImageState extends State<ItemImage> {
       fit: StackFit.expand,
       children: [
         Container(
-          color: Colors.blue,
-          child: FadeInImage.assetNetwork(
-            placeholder: "assets/images/loading.gif",
-            image: widget.imageModel.originUrl!,
-            fit: BoxFit.fitWidth,
-          ),
+          decoration: ShapeDecoration(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(6))),
+              image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: NetworkImage(widget.imageModel.originUrl!))),
         ),
         Stack(alignment: Alignment.bottomCenter, children: [
           Positioned(

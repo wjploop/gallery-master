@@ -61,7 +61,7 @@ class Page {
     if (json['content'] != null) {
       content = [];
       json['content'].forEach((v) {
-        content?.add(ImageModel.fromJson(v));
+        content?.add(ImageEntity.fromJson(v));
       });
     }
     pageable =
@@ -77,7 +77,7 @@ class Page {
     empty = json['empty'];
   }
 
-  List<ImageModel>? content;
+  List<ImageEntity>? content;
   Pageable? pageable;
   bool? last;
   int? totalPages;
@@ -206,8 +206,8 @@ class Pageable {
 /// currentUrl : null
 /// type : "image"
 
-class ImageModel {
-  ImageModel({
+class ImageEntity {
+  ImageEntity({
     this.id,
     this.categoryId,
     this.categoryName,
@@ -216,7 +216,7 @@ class ImageModel {
     this.type,
   });
 
-  ImageModel.fromJson(dynamic json) {
+  ImageEntity.fromJson(dynamic json) {
     id = json['id'];
     categoryId = json['categoryId'];
     categoryName = json['categoryName'];

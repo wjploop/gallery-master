@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:gallery/data/model/resp_category.dart';
-import 'package:gallery/data/model/resp_image.dart';
-import 'package:gallery/data/model/resp_tag.dart';
-import 'package:gallery/data/model/resp_tags_by_image_id.dart';
+import 'package:gallery/data/entity/resp_category.dart';
+import 'package:gallery/data/entity/resp_image.dart';
+import 'package:gallery/data/entity/resp_tag.dart';
+import 'package:gallery/data/entity/resp_tags_by_image_id.dart';
 
 class Client {
   static final Client _client = Client._internal();

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:gallery/data/model/resp_tag.dart';
+import 'package:gallery/data/entity/resp_tag.dart';
 
 import '../component/item_image.dart';
 import '../data/api/client.dart';
-import '../data/model/resp_image.dart';
+import '../data/entity/resp_image.dart';
 
 class ImageByTagPage extends StatefulWidget {
   final Tag tag;
@@ -15,7 +15,7 @@ class ImageByTagPage extends StatefulWidget {
 }
 
 class _ImageByTagPageState extends State<ImageByTagPage> {
-  List<ImageModel> items = [];
+  List<ImageEntity> items = [];
 
   @override
   void initState() {

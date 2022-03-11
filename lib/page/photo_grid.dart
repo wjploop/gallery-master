@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:gallery/component/item_image.dart';
 import 'package:gallery/data/api/client.dart';
-import 'package:gallery/data/model/resp_category.dart';
-import 'package:gallery/data/model/resp_image.dart';
+import 'package:gallery/data/entity/resp_category.dart';
+import 'package:gallery/data/model/ImagePageModel.dart';
+import 'package:gallery/util/logger.dart';
 
 class PhotoGrid extends StatefulWidget {
   final CategoryModel category;
 
-  const PhotoGrid({Key? key, required this.category}) : super(key: key);
+  final ImagePageModel model;
+
+  const PhotoGrid({Key? key, required this.category, required this.model})
+      : super(key: key);
 
   @override
   _PhotoGridState createState() => _PhotoGridState();
@@ -15,19 +19,20 @@ class PhotoGrid extends StatefulWidget {
 
 class _PhotoGridState extends State<PhotoGrid>
     with AutomaticKeepAliveClientMixin {
-  List<ImageModel> items = [];
-  int p = 0;
-  bool hasMore = true;
   bool loading = false;
 
-  late PageController _scrollController;
+  late ImagePageModel model;
+
+  late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = PageController();
+    model = widget.model;
+    _scrollController = ScrollController();
     _scrollController.addListener(() {
-      if (_scrollController.page == items.length - 3) {
+      if (_scrollController.offset >
+          _scrollController.position.maxScrollExtent - 200) {
         getData();
       }
     });
@@ -35,14 +40,17 @@ class _PhotoGridState extends State<PhotoGrid>
   }
 
   Future getData() async {
-    if (loading) {
+    if (loading || !widget.model.hasMore) {
       return;
     }
-    Client().images(widget.category.id!, p++).then((value) {
+    loading = true;
+    logger.i("get page ${widget.model.page}");
+    Client().images(widget.category.id!, widget.model.page++).then((value) {
+      loading = false;
       var page = value.data;
       setState(() {
-        items.addAll(page!.content!);
-        hasMore = !page.last!;
+        widget.model.items.addAll(page!.content!);
+        widget.model.hasMore = !page.last!;
       });
     });
   }
@@ -50,16 +58,39 @@ class _PhotoGridState extends State<PhotoGrid>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (items.isNotEmpty) {
+    if (widget.model.items.isNotEmpty) {
       return RefreshIndicator(
-          child: PageView.builder(
-              scrollDirection: Axis.vertical,
-              itemCount: items.length,
-              controller: _scrollController,
-              itemBuilder: (context, index) {
-                return ItemImage(imageModel:
-                items[index]);
-              }),
+          child: CustomScrollView(
+            scrollDirection: Axis.vertical,
+            controller: _scrollController,
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.all(12),
+                sliver: SliverGrid(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) =>
+                          ItemImage(imageModel: model.items[index]),
+                      childCount: model.items.length,
+                    ),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        mainAxisExtent: 300)),
+              ),
+              SliverToBoxAdapter(
+                child: model.hasMore
+                    ? Container()
+                    : Container(
+                        padding: EdgeInsets.all(20),
+                        child: Text(
+                          "已经到底了哦~",
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+              )
+            ],
+          ),
           onRefresh: _onRefresh);
     }
 
@@ -69,7 +100,7 @@ class _PhotoGridState extends State<PhotoGrid>
   }
 
   Future<void> _onRefresh() async {
-    p = 0;
+    model.page = 0;
     getData();
   }
 

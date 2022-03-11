@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gallery/data/api/client.dart';
-import 'package:gallery/data/model/resp_category.dart';
+import 'package:gallery/data/entity/resp_category.dart';
 import 'package:gallery/page/photo_grid.dart';
 
 import '../util/logger.dart';
@@ -40,20 +40,22 @@ class _HomeState extends State<Home> {
         length: categories.length,
         child: Scaffold(
           appBar: AppBar(
-            title: Text("萝卜壁纸"),
+              title: Text("萝卜壁纸"),
               bottom: TabBar(
-            isScrollable: true,
-            tabs: categories
-                .map((e) => Tab(
-                      text: e.name,
-                    ))
-                .toList(),
-          )),
+                isScrollable: true,
+                tabs: categories
+                    .map((e) => Tab(
+                          text: e.name,
+                        ))
+                    .toList(),
+              )),
           body: TabBarView(
             children: categories
-                .map((e) => PhotoGrid(
-                      category: e,
-                    ))
+                .map(
+                  (e) => PhotoGrid(
+                    category: e,
+                  ),
+                )
                 .toList(),
           ),
         ));

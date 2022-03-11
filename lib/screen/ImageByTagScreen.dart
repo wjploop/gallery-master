@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gallery/data/model/resp_tag.dart';
+import 'package:gallery/data/entity/resp_tag.dart';
 import 'package:gallery/page/page_image_by_tag.dart';
 
 class ImageByTagScreen extends StatelessWidget {

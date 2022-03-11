@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:gallery/page/ImageByTagScreen.dart';
+import 'package:gallery/data/model/image_map_model.dart';
 import 'package:gallery/page/home.dart';
+import 'package:gallery/screen/ImageByTagScreen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(providers: [
+    Provider(
+      create: (context) => ImagePageMapModel(),
+    )
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
