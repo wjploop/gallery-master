@@ -5,6 +5,8 @@ import 'package:gallery/data/entity/resp_category.dart';
 import 'package:gallery/data/model/ImagePageModel.dart';
 import 'package:gallery/util/logger.dart';
 
+import '../screen/routes.dart';
+
 class PhotoGrid extends StatefulWidget {
   final CategoryModel category;
 
@@ -68,8 +70,18 @@ class _PhotoGridState extends State<PhotoGrid>
                 padding: EdgeInsets.all(12),
                 sliver: SliverGrid(
                     delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) =>
-                          ItemImage(imageModel: model.items[index]),
+                      (BuildContext context, int index) => ItemImage(
+                        imageModel: model.items[index],
+                        onTap: () {
+                          print('on tap $index');
+                          Navigator.of(context).pushNamed(
+                              Routes.image_full_screen.name,
+                              arguments: {
+                                'model': widget.model,
+                                "index": index
+                              });
+                        },
+                      ),
                       childCount: model.items.length,
                     ),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

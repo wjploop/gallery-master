@@ -1,3 +1,5 @@
+import 'package:gallery/data/entity/resp_tag.dart';
+
 /// code : 1000
 /// msg : "success"
 /// data : [{"name":"赵露思","id":25,"type":"tag"},{"name":"白色裙子","id":29,"type":"tag"},{"name":"美女手机壁纸\n","id":31,"type":"tag"},{"name":"户外","id":35,"type":"tag"}]
@@ -14,13 +16,13 @@ class RespTagsByImageId {
     if (json['data'] != null) {
       data = [];
       json['data'].forEach((v) {
-        data?.add(Data.fromJson(v));
+        data?.add(Tag.fromJson(v));
       });
     }
   }
   int? code;
   String? msg;
-  List<Data>? data;
+  List<Tag>? data;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -32,33 +34,8 @@ class RespTagsByImageId {
     return map;
   }
 
-}
-
-/// name : "赵露思"
-/// id : 25
-/// type : "tag"
-
-class Data {
-  Data({
-      this.name, 
-      this.id, 
-      this.type,});
-
-  Data.fromJson(dynamic json) {
-    name = json['name']?.replaceAll("\n","");
-    id = json['id'];
-    type = json['type'];
+  @override
+  String toString() {
+    return 'RespTagsByImageId{code: $code, msg: $msg, data: $data}';
   }
-  String? name;
-  int? id;
-  String? type;
-
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map['name'] = name;
-    map['id'] = id;
-    map['type'] = type;
-    return map;
-  }
-
 }

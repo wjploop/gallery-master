@@ -13,7 +13,7 @@ class Client {
 
   late Dio _dio;
 
-  var _domain = "http://150.158.92.41/image/";
+  var _domain = "http://wjploop.xyz/image/";
 
   Client._internal() {
     _dio = Dio(BaseOptions(
