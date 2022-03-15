@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gallery/data/model/ImagePageModel.dart';
 import 'package:gallery/util/logger.dart';
+import 'package:wallpaper/wallpaper.dart';
 
 import '../data/api/client.dart';
 import '../data/entity/resp_tag.dart';
@@ -65,7 +66,7 @@ class _PhotoPageState extends State<PhotoPage> {
             opacity: showDetail ? 1.0 : 0.0,
             duration: Duration(milliseconds: 500),
             child: GestureDetector(
-              onTap: (){
+              onTap: () {
                 Navigator.pop(context);
               },
               child: Icon(
@@ -81,88 +82,154 @@ class _PhotoPageState extends State<PhotoPage> {
           onPageChanged: (page) {
             getTags(page);
           },
-          itemBuilder: (context, index) => Hero(
-                tag: items[index].id!,
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      showDetail = !showDetail;
-                    });
-                  },
-                  child: Material(
-                    clipBehavior: Clip.antiAlias,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(0)),
-                    ),
-                    child: InkWell(
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.network(
+          itemBuilder: (context, index) => GestureDetector(
+                onTap: () {
+                  setState(() {
+                    showDetail = !showDetail;
+                  });
+                },
+                child: Material(
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(0)),
+                  ),
+                  child: InkWell(
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Hero(
+                          tag: items[index].id!,
+                          child: Image.network(
                             items[index].originUrl!,
                             fit: BoxFit.cover,
                           ),
-                          Visibility(
-                            visible: showDetail,
-                            child: Stack(alignment: Alignment.bottomLeft, children: [
-                              Container(
-                                margin: EdgeInsets.only(bottom: 30),
-                                width: double.maxFinite,
-                                child: Column(
-                                  verticalDirection: VerticalDirection.up,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    ElevatedButton(
-                                        onPressed: () {},
-                                        style: ButtonStyle(
-                                            padding: MaterialStateProperty.resolveWith((states) => EdgeInsets.symmetric(horizontal: 80, vertical: 12)),
-                                            shape: MaterialStateProperty.resolveWith((states) => RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)))),
-                                            backgroundColor: MaterialStateProperty.resolveWith((states) => Colors.yellow.shade700)),
+                        ),
+                        Visibility(
+                          visible: showDetail,
+                          child: Stack(alignment: Alignment.bottomLeft, children: [
+                            Container(
+                              margin: EdgeInsets.only(bottom: 30),
+                              width: double.maxFinite,
+                              child: Column(
+                                verticalDirection: VerticalDirection.up,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  ElevatedButton(
+                                      onPressed: () {
+                                        showModalBottomSheet(
+                                            context: context,
+                                            builder: (context) {
+                                              return Wrap(
+                                                children: [
+                                                  Container(
+                                                    padding: EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+                                                    child: Column(
+                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Hero(
+                                                            tag: "hero_setting",
+                                                            child: Text(
+                                                              "设为壁纸",
+                                                            )),
+                                                        SizedBox(
+                                                          height: 20,
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                          children: [
+                                                            buildButton(Icons.desktop_mac, "设为桌面", () async {
+                                                              Wallpaper.imageDownloadProgress(items[index].originUrl!).listen((event) {
+                                                                logger.i(event);
+                                                              }).onDone(() {
+                                                                Wallpaper.bothScreen();
+                                                                logger.i("done");
+                                                              });
+                                                            }),
+                                                            buildButton(Icons.phonelink_lock_rounded, "设为锁屏", () {}),
+                                                            buildButton(Icons.download_rounded, "下载壁纸", () {}),
+                                                          ],
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            });
+                                      },
+                                      style: ButtonStyle(
+                                          padding: MaterialStateProperty.resolveWith((states) => EdgeInsets.symmetric(horizontal: 80, vertical: 12)),
+                                          shape: MaterialStateProperty.resolveWith((states) => RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)))),
+                                          backgroundColor: MaterialStateProperty.resolveWith((states) => Colors.yellow.shade700)),
+                                      child: Hero(
+                                        tag: "hero_setting",
                                         child: Text(
                                           "设为壁纸",
                                           style: TextStyle(color: Colors.white),
-                                        )),
-                                    SizedBox(
-                                      width: double.maxFinite,
-                                      child: SingleChildScrollView(
-                                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 40),
-                                        scrollDirection: Axis.horizontal,
-                                        child: Row(
-                                          children: tags
-                                              .map((e) => Container(
-                                                    margin: EdgeInsets.symmetric(horizontal: 6),
-                                                    child: Material(
-                                                      color: Colors.blueGrey.withOpacity(0.5).withAlpha(120),
-                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(22))),
-                                                      child: InkWell(
-                                                        onTap: () {
-                                                          Navigator.of(context).pushNamed(Routes.image_by_tag.name, arguments: e);
-                                                        },
-                                                        child: Container(
-                                                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                                                          child: Text(
-                                                            e.name!,
-                                                            style: TextStyle(fontSize: 12, color: Colors.white),
-                                                          ),
+                                        ),
+                                      )),
+                                  SizedBox(
+                                    width: double.maxFinite,
+                                    child: SingleChildScrollView(
+                                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 40),
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: tags
+                                            .map((e) => Container(
+                                                  margin: EdgeInsets.symmetric(horizontal: 6),
+                                                  child: Material(
+                                                    color: Colors.blueGrey.withOpacity(0.5).withAlpha(120),
+                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(22))),
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        Navigator.of(context).pushNamed(Routes.image_by_tag.name, arguments: e);
+                                                      },
+                                                      child: Container(
+                                                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                                        child: Text(
+                                                          e.name!,
+                                                          style: TextStyle(fontSize: 12, color: Colors.white),
                                                         ),
                                                       ),
                                                     ),
-                                                  ))
-                                              .toList(),
-                                        ),
+                                                  ),
+                                                ))
+                                            .toList(),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            ]),
-                          ),
-                        ],
-                      ),
+                            ),
+                          ]),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               )),
+    );
+  }
+
+  Widget buildButton(IconData icon, String text, VoidCallback onPress) {
+    return Material(
+      shape: CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPress,
+        child: Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Icon(icon),
+              SizedBox(
+                height: 10,
+              ),
+              Text(text)
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

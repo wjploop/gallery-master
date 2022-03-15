@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gallery/data/model/image_map_model.dart';
 import 'package:gallery/page/photo_page.dart';
-import 'package:provider/provider.dart';
 
 class ScreenFullImage extends StatelessWidget {
   const ScreenFullImage({Key? key}) : super(key: key);
