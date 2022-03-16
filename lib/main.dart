@@ -1,15 +1,21 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gallery/data/model/device.dart';
 import 'package:gallery/data/model/image_map_model.dart';
 import 'package:gallery/page/home.dart';
 import 'package:gallery/screen/routes.dart';
 import 'package:gallery/screen/screen_image_by_tag.dart';
 import 'package:gallery/screen/screen_image_full.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+
 
 void main() {
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(statusBarColor: Colors.transparent));
+  WidgetsFlutterBinding.ensureInitialized();
+  CachedNetworkImage.logLevel = CacheManagerLogLevel.verbose;
 
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(statusBarColor: Colors.transparent));
   runApp(MultiProvider(providers: [
     Provider(
       create: (context) => ImagePageMapModel(),

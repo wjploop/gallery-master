@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gallery/component/my_cache_image.dart';
 import 'package:gallery/data/model/ImagePageModel.dart';
+import 'package:gallery/data/model/device.dart';
+import 'package:gallery/data/model/my_cache_manger.dart';
 import 'package:gallery/util/logger.dart';
 import 'package:wallpaper/wallpaper.dart';
 
@@ -99,10 +102,7 @@ class _PhotoPageState extends State<PhotoPage> {
                       children: [
                         Hero(
                           tag: items[index].id!,
-                          child: Image.network(
-                            items[index].originUrl!,
-                            fit: BoxFit.cover,
-                          ),
+                          child: MyCacheImage(url: items[index].originUrl!,),
                         ),
                         Visibility(
                           visible: showDetail,
@@ -146,7 +146,12 @@ class _PhotoPageState extends State<PhotoPage> {
                                                                 logger.i("done");
                                                               });
                                                             }),
-                                                            buildButton(Icons.phonelink_lock_rounded, "设为锁屏", () {}),
+                                                            buildButton(Icons.phonelink_lock_rounded, "设为锁屏", () {
+                                                              logger.i("device ${Device().width},${Device().height}");
+                                                              MyCacheManager().getSingleFile(items[index].originUrl!).then((value) => {
+                                                                logger.i("current file $value")
+                                                              });
+                                                            }),
                                                             buildButton(Icons.download_rounded, "下载壁纸", () {}),
                                                           ],
                                                         )

@@ -1,6 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:gallery/component/my_cache_image.dart';
 import 'package:gallery/data/api/client.dart';
 import 'package:gallery/data/entity/resp_image.dart';
+import 'package:gallery/data/model/my_cache_manger.dart';
 import 'package:gallery/screen/screen_image_by_tag.dart';
 
 import '../data/entity//resp_tag.dart';
@@ -69,6 +72,7 @@ class _ItemImageState extends State<ItemImage> {
 
   @override
   Widget build(BuildContext context) {
+    var imageUrl = widget.imageModel.originUrl!;
     return Hero(
       tag: widget.imageModel.id!,
       child: Material(
@@ -81,17 +85,7 @@ class _ItemImageState extends State<ItemImage> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.network(
-                widget.imageModel.originUrl!,
-                fit: BoxFit.cover,
-              ),
-              // Container(
-              //   decoration: ShapeDecoration(
-              //       shape: RoundedRectangleBorder(
-              //           borderRadius: BorderRadius.all(Radius.circular(6))),
-              //       image: DecorationImage(
-              //           fit: BoxFit.cover, image: NetworkImage())),
-              // ),
+              MyCacheImage(url: imageUrl),
               Stack(alignment: Alignment.bottomCenter, children: [
                 Positioned(
                   child: SingleChildScrollView(

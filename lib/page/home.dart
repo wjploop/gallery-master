@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gallery/data/api/client.dart';
 import 'package:gallery/data/entity/resp_category.dart';
+import 'package:gallery/data/model/device.dart';
 import 'package:gallery/data/model/image_map_model.dart';
 import 'package:gallery/page/photo_grid.dart';
 import 'package:provider/provider.dart';
@@ -38,6 +39,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    Device().init(context);
     return DefaultTabController(
         length: categories.length,
         child: Scaffold(

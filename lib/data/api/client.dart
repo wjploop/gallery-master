@@ -11,40 +11,43 @@ class Client {
     return _client;
   }
 
-  late Dio _dio;
+  late Dio dio;
 
   var _domain = "http://wjploop.xyz/image/";
 
   Client._internal() {
-    _dio = Dio(BaseOptions(
+    dio = Dio(BaseOptions(
       baseUrl: _domain,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      }
     ));
   }
 
   Future<RespCategory> categories() async {
-    var resp = await _dio.get("categories");
+    var resp = await dio.get("categories");
     return RespCategory.fromJson(resp.data);
   }
 
   Future<RespTag> tags() async {
-    var resp = await _dio.get("tags");
+    var resp = await dio.get("tags");
     return RespTag.fromJson(resp.data);
   }
 
   Future<RespImage> images(int categoryId, int page) async {
-    var resp = await _dio.get("images",
+    var resp = await dio.get("images",
         queryParameters: {"categoryId": categoryId, "page": page});
     return RespImage.fromJson(resp.data);
   }
 
   Future<RespImage> imagesByTagId(int tagId, int page, int size) async {
-    var resp = await _dio.get("images",
+    var resp = await dio.get("images",
         queryParameters: {"tagId": tagId, "page": page, "size": size});
     return RespImage.fromJson(resp.data);
   }
 
   Future<RespTagsByImageId> tagsByImageId(int imageId) async {
-    var resp = await _dio
+    var resp = await dio
         .get("tags_by_image_id", queryParameters: {"imageId": imageId});
     return RespTagsByImageId.fromJson(resp.data);
   }
