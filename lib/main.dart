@@ -1,15 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gallery/data/model/device.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:gallery/data/model/image_map_model.dart';
 import 'package:gallery/page/home.dart';
+import 'package:gallery/route/fade_route.dart';
 import 'package:gallery/screen/routes.dart';
 import 'package:gallery/screen/screen_image_by_tag.dart';
 import 'package:gallery/screen/screen_image_full.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +37,12 @@ class MyApp extends StatelessWidget {
       home: Home(),
       routes: {
         Routes.image_by_tag.name: (context) => ScreenImageByTag(),
-        Routes.image_full_screen.name: (context) => ScreenFullImage()
+        // Routes.image_full_screen.name: (context) => ScreenFullImage(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == Routes.image_full_screen.name) {
+          return FadeRoute(settings: settings, builder: (context) => ScreenFullImage());
+        }
       },
     );
   }

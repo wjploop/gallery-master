@@ -27,7 +27,7 @@ class _PhotoPageState extends State<PhotoPage> {
 
   bool isActive = false;
 
-  bool showDetail = true;
+  bool showDetail = false;
 
   @override
   void initState() {
@@ -62,6 +62,7 @@ class _PhotoPageState extends State<PhotoPage> {
     var items = widget.model.items;
     return Scaffold(
       extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -91,125 +92,112 @@ class _PhotoPageState extends State<PhotoPage> {
                     showDetail = !showDetail;
                   });
                 },
-                child: Material(
-                  clipBehavior: Clip.antiAlias,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(0)),
-                  ),
-                  child: InkWell(
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Hero(
-                          tag: items[index].id!,
-                          child: MyCacheImage(url: items[index].originUrl!,),
-                        ),
-                        Visibility(
-                          visible: showDetail,
-                          child: Stack(alignment: Alignment.bottomLeft, children: [
-                            Container(
-                              margin: EdgeInsets.only(bottom: 30),
-                              width: double.maxFinite,
-                              child: Column(
-                                verticalDirection: VerticalDirection.up,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  ElevatedButton(
-                                      onPressed: () {
-                                        showModalBottomSheet(
-                                            context: context,
-                                            builder: (context) {
-                                              return Wrap(
-                                                children: [
-                                                  Container(
-                                                    padding: EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-                                                    child: Column(
-                                                      mainAxisAlignment: MainAxisAlignment.start,
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        Hero(
-                                                            tag: "hero_setting",
-                                                            child: Text(
-                                                              "设为壁纸",
-                                                            )),
-                                                        SizedBox(
-                                                          height: 20,
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                          children: [
-                                                            buildButton(Icons.desktop_mac, "设为桌面", () async {
-                                                              Wallpaper.imageDownloadProgress(items[index].originUrl!).listen((event) {
-                                                                logger.i(event);
-                                                              }).onDone(() {
-                                                                Wallpaper.bothScreen();
-                                                                logger.i("done");
-                                                              });
-                                                            }),
-                                                            buildButton(Icons.phonelink_lock_rounded, "设为锁屏", () {
-                                                              logger.i("device ${Device().width},${Device().height}");
-                                                              MyCacheManager().getSingleFile(items[index].originUrl!).then((value) => {
-                                                                logger.i("current file $value")
-                                                              });
-                                                            }),
-                                                            buildButton(Icons.download_rounded, "下载壁纸", () {}),
-                                                          ],
-                                                        )
-                                                      ],
-                                                    ),
+                child: Hero(
+                  tag: items[index].id!,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      MyCacheImage(url: items[index].originUrl!,),
+                      Visibility(
+                        visible: showDetail,
+                        child: Stack(alignment: Alignment.bottomLeft, children: [
+                          Container(
+                            margin: EdgeInsets.only(bottom: 30),
+                            width: double.maxFinite,
+                            child: Column(
+                              verticalDirection: VerticalDirection.up,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                ElevatedButton(
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                          context: context,
+                                          builder: (context) {
+                                            return Wrap(
+                                              children: [
+                                                Container(
+                                                  padding: EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+                                                  child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        "设为壁纸",
+                                                      ),
+                                                      SizedBox(
+                                                        height: 20,
+                                                      ),
+                                                      Row(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                        children: [
+                                                          buildButton(Icons.desktop_mac, "设为桌面", () async {
+                                                            Wallpaper.imageDownloadProgress(items[index].originUrl!).listen((event) {
+                                                              logger.i(event);
+                                                            }).onDone(() {
+                                                              Wallpaper.bothScreen();
+                                                              logger.i("done");
+                                                            });
+                                                          }),
+                                                          buildButton(Icons.phonelink_lock_rounded, "设为锁屏", () {
+                                                            logger.i("device ${Device().width},${Device().height}");
+                                                            MyCacheManager().getSingleFile(items[index].originUrl!).then((value) => {
+                                                              logger.i("current file $value")
+                                                            });
+                                                          }),
+                                                          buildButton(Icons.download_rounded, "下载壁纸", () {}),
+                                                        ],
+                                                      )
+                                                    ],
                                                   ),
-                                                ],
-                                              );
-                                            });
-                                      },
-                                      style: ButtonStyle(
-                                          padding: MaterialStateProperty.resolveWith((states) => EdgeInsets.symmetric(horizontal: 80, vertical: 12)),
-                                          shape: MaterialStateProperty.resolveWith((states) => RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)))),
-                                          backgroundColor: MaterialStateProperty.resolveWith((states) => Colors.yellow.shade700)),
-                                      child: Hero(
-                                        tag: "hero_setting",
-                                        child: Text(
-                                          "设为壁纸",
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      )),
-                                  SizedBox(
-                                    width: double.maxFinite,
-                                    child: SingleChildScrollView(
-                                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 40),
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        children: tags
-                                            .map((e) => Container(
-                                                  margin: EdgeInsets.symmetric(horizontal: 6),
-                                                  child: Material(
-                                                    color: Colors.blueGrey.withOpacity(0.5).withAlpha(120),
-                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(22))),
-                                                    child: InkWell(
-                                                      onTap: () {
-                                                        Navigator.of(context).pushNamed(Routes.image_by_tag.name, arguments: e);
-                                                      },
-                                                      child: Container(
-                                                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                                                        child: Text(
-                                                          e.name!,
-                                                          style: TextStyle(fontSize: 12, color: Colors.white),
-                                                        ),
+                                                ),
+                                              ],
+                                            );
+                                          });
+                                    },
+                                    style: ButtonStyle(
+                                        padding: MaterialStateProperty.resolveWith((states) => EdgeInsets.symmetric(horizontal: 80, vertical: 12)),
+                                        shape: MaterialStateProperty.resolveWith((states) => RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)))),
+                                        backgroundColor: MaterialStateProperty.resolveWith((states) => Colors.yellow.shade700)),
+                                    child: Text(
+                                      "设为壁纸",
+                                      style: TextStyle(color: Colors.white),
+                                    )),
+                                SizedBox(
+                                  width: double.maxFinite,
+                                  child: SingleChildScrollView(
+                                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 40),
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: tags
+                                          .map((e) => Container(
+                                                margin: EdgeInsets.symmetric(horizontal: 6),
+                                                child: Material(
+                                                  color: Colors.blueGrey.withOpacity(0.5).withAlpha(120),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(22))),
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      Navigator.of(context).pushNamed(Routes.image_by_tag.name, arguments: e);
+                                                    },
+                                                    child: Container(
+                                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                                      child: Text(
+                                                        e.name!,
+                                                        style: TextStyle(fontSize: 12, color: Colors.white),
                                                       ),
                                                     ),
                                                   ),
-                                                ))
-                                            .toList(),
-                                      ),
+                                                ),
+                                              ))
+                                          .toList(),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ]),
-                        ),
-                      ],
-                    ),
+                          ),
+                        ]),
+                      ),
+                    ],
                   ),
                 ),
               )),

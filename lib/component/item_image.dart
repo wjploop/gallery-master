@@ -73,32 +73,31 @@ class _ItemImageState extends State<ItemImage> {
   @override
   Widget build(BuildContext context) {
     var imageUrl = widget.imageModel.originUrl!;
-    return Hero(
-      tag: widget.imageModel.id!,
-      child: Material(
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(6)),
-        ),
-        child: InkWell(
-          onTap: widget.onTap,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              MyCacheImage(url: imageUrl),
-              Stack(alignment: Alignment.bottomCenter, children: [
-                Positioned(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.only(top: 40, bottom: 40),
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: tags,
-                    ),
+    return Material(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(6)),
+      ),
+      child: InkWell(
+        onTap: widget.onTap,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Hero(
+                tag: widget.imageModel.id!,
+                child: MyCacheImage(url: imageUrl)),
+            Stack(alignment: Alignment.bottomCenter, children: [
+              Positioned(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.only(top: 40, bottom: 40),
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: tags,
                   ),
                 ),
-              ]),
-            ],
-          ),
+              ),
+            ]),
+          ],
         ),
       ),
     );
