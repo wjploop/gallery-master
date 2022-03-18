@@ -11,14 +11,18 @@ class MyCacheImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CachedNetworkImage(
-      placeholder: ((context, url) => Image.asset("assets/images/loading.gif")),
-      imageUrl: url,
-      cacheManager: MyCacheManager(),
-      fit: BoxFit.fitWidth,
-      memCacheWidth: Device().width.toInt(),
-      memCacheHeight: Device().height.toInt(),
+    return LayoutBuilder(
+      builder: (context, constraints) => CachedNetworkImage(
+        placeholder: ((context, url) => Image.asset("assets/images/loading.gif")),
+        imageUrl: url,
+        // width: constraints.maxWidth,
+        // height: constraints.maxWidth / Device().aspectRatio,
+        cacheManager: MyCacheManager(),
+        fit: BoxFit.cover,
+        memCacheWidth: Device().width.toInt(),
+        memCacheHeight: Device().height.toInt(),
 
-    );
+      ))
+    ;
   }
 }
