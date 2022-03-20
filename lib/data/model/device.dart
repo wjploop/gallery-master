@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:gallery/util/logger.dart';
+import 'package:my_plugin/my_plugin.dart';
+import 'package:my_plugin/screen_info.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:plugin/plugin.dart';
-import 'package:plugin/screen_info.dart';
 
 class Device {
   static final _instane = Device._();
@@ -34,7 +34,7 @@ class Device {
     devicePixelRatio = MediaQuery
         .of(context)
         .devicePixelRatio;
-    screenInfo = await Plugin.screenInfo;
+    screenInfo = await MyPlugin.screenInfo;
 
     appDir = await getApplicationDocumentsDirectory();
     pictureDir = (await getExternalStorageDirectories(type: StorageDirectory.pictures))!.first;

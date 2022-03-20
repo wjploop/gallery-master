@@ -1,15 +1,16 @@
 import 'dart:io';
 
-import 'package:action_broadcast/action_broadcast.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery/component/my_cache_image.dart';
+import 'package:gallery/data/constant/wallpaper_type.dart';
 import 'package:gallery/data/model/ImagePageModel.dart';
 import 'package:gallery/data/model/device.dart';
 import 'package:gallery/data/model/my_cache_manger.dart';
 import 'package:gallery/util/logger.dart';
-import 'package:path/path.dart' as path;
+import 'package:my_plugin/my_plugin.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:plugin/plugin.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 import 'package:wallpaper/wallpaper.dart';
 
 import '../data/api/client.dart';
@@ -100,7 +101,7 @@ class _PhotoPageState extends State<PhotoPage> {
                     Hero(
                       tag: items[index].id!,
                       child: ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(Device().screenInfo.arcRadius / Device().devicePixelRatio)),
+                          borderRadius: BorderRadius.all(Radius.circular(Device().screenInfo.connerRadius / Device().devicePixelRatio)),
                           child: MyCacheImage(
                             url: items[index].originUrl!,
                           )),
@@ -108,6 +109,41 @@ class _PhotoPageState extends State<PhotoPage> {
                     Visibility(
                       visible: showDetail,
                       child: Stack(alignment: Alignment.bottomLeft, children: [
+                        Positioned(
+                          right: 0,
+                          bottom: 200,
+                          child: Column(
+                            children: [
+                              // buildRightButton(Image.asset("assets/images/collect_white.png"), "喜欢", () async {
+                              //
+                              // }),
+                              buildRightButton(Image.asset("assets/images/share.png",color:Colors.white), "分享", () async {
+                                var f = await MyCacheManager().getSingleFile(items[index].originUrl!);
+                                MyPlugin.share(f.path);
+                              }),
+                              buildRightButton(Image.asset("assets/images/download.png",color: Colors.white,), "下载", () async {
+                                var f = await MyCacheManager().getSingleFile(items[index].originUrl!);
+                                var status = await Permission.storage.status;
+                                if (status.isDenied) {
+                                  status = await Permission.storage.request();
+                                }
+                                logger.i("check read storage status $status");
+                                if (status.isGranted) {
+                                  if (await File("/sdcard/Pictures/${f.basename}").exists()) {
+                                    showTopSnackBar(context, GestureDetector(onTap: MyPlugin.openGallery, child: CustomSnackBar.info(message: "该图片已经存在于图库了哦，点击进入系统图库查看")));
+                                    return;
+                                  }
+                                  logger.i("start insert ${f.path}");
+                                  await MyPlugin.insertPictureToSystemGallery(f.path, f.basename);
+                                  logger.i("insert ${f.path} to system gallery");
+                                  showTopSnackBar(context, GestureDetector(onTap: MyPlugin.openGallery, child: CustomSnackBar.success(message: "下载成功，点击进入系统图库查看")));
+                                } else {
+                                  showTopSnackBar(context, CustomSnackBar.error(message: "未能获取到存储权限，无法下载图片哦，请手动授予【存储权限】"));
+                                }
+                              }),
+                            ],
+                          ),
+                        ),
                         Container(
                           margin: EdgeInsets.only(bottom: 30),
                           width: double.maxFinite,
@@ -119,6 +155,7 @@ class _PhotoPageState extends State<PhotoPage> {
                                   onPressed: () {
                                     showModalBottomSheet(
                                         context: context,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20),topRight: Radius.circular(20))),
                                         builder: (context) {
                                           return Wrap(
                                             children: [
@@ -137,44 +174,25 @@ class _PhotoPageState extends State<PhotoPage> {
                                                     Row(
                                                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                       children: [
-                                                        buildButton(Icons.desktop_mac, "设为桌面", () async {
-                                                          Wallpaper.imageDownloadProgress(items[index].originUrl!).listen((event) {
-                                                            logger.i(event);
-                                                          }).onDone(() {
-                                                            Wallpaper.bothScreen();
-                                                            logger.i("done");
-                                                          });
-                                                        }),
-                                                        buildButton(Icons.phonelink_lock_rounded, "设为锁屏", () {
-                                                          logger.i("device ${Device().width},${Device().height}");
-                                                          MyCacheManager().getSingleFile(items[index].originUrl!).then((value) => {logger.i("current file $value")});
-                                                        }),
-                                                        buildButton(Icons.download_rounded, "下载壁纸", () async {
-                                                          var file = File("");
-                                                          logger.i("${file.absolute}");
+                                                        buildButton("assets/images/screen_home.png", "设为桌面", () async {
                                                           var f = await MyCacheManager().getSingleFile(items[index].originUrl!);
-                                                          logger.i("file ${f.basename}");
-
-                                                          // f.copy(path.join(Device().pictureDir.path, f.basename));
-
-                                                          var status = await Permission.storage.status;
-                                                          if (status.isDenied) {
-                                                            Permission.storage.request();
-                                                          }
-                                                          if (status.isGranted) {
-                                                            // var picDir = "/sdcard/Pictures/";
-                                                            var dir = Directory("/storage/emulated/0/Pictures");
-                                                            if (!await dir.exists()) {
-                                                              await dir.create();
-                                                            }
-
-                                                            var dist = path.join(dir.path, f.basename);
-                                                            f.copySync(dist);
-
-                                                            logger.i("copy to $dist");
-                                                            Plugin.notify_system_gallery_has_new_picture();
+                                                          var res = await MyPlugin.setWallpaper(f.path, WallpaperType.system.index);
+                                                          if(res) {
+                                                            showTopSnackBar(context, CustomSnackBar.success(message: "设置桌面成功"));
+                                                          }else{
+                                                            showTopSnackBar(context, CustomSnackBar.error(message: "设置桌面失败"));
                                                           }
                                                         }),
+                                                        buildButton("assets/images/screen_locked.png", "设为锁屏", () async {
+                                                          var f = await MyCacheManager().getSingleFile(items[index].originUrl!);
+                                                          var res = await MyPlugin.setWallpaper(f.path, WallpaperType.lock.index);
+                                                          if(res) {
+                                                            showTopSnackBar(context, CustomSnackBar.success(message: "设为锁屏成功"));
+                                                          }else{
+                                                            showTopSnackBar(context, CustomSnackBar.error(message: "设为锁屏失败"));
+                                                          }
+                                                        }),
+
                                                       ],
                                                     )
                                                   ],
@@ -233,21 +251,53 @@ class _PhotoPageState extends State<PhotoPage> {
     );
   }
 
-  Widget buildButton(IconData icon, String text, VoidCallback onPress) {
+  Widget buildButton(String assetIcon, String text, VoidCallback onPress) {
     return Material(
       shape: CircleBorder(),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onPress,
+        onTap: () async {
+          onPress();
+          Navigator.of(context).pop();
+        },
         child: Container(
           padding: EdgeInsets.all(20),
           child: Column(
             children: [
-              Icon(icon),
+              SizedBox(
+                width: 40,
+                  child: Image.asset(assetIcon)),
               SizedBox(
                 height: 10,
               ),
               Text(text)
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildRightButton(Widget icon, String text, VoidCallback onPress) {
+    return Material(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(40))),
+      color: Colors.transparent,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () async {
+          onPress();
+        },
+        child: Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            children: [
+              SizedBox(
+                width: 35,
+                  child: icon),
+              SizedBox(
+                height: 6,
+              ),
+              Text(text,style: TextStyle(color: Colors.white),)
             ],
           ),
         ),
