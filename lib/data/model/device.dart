@@ -24,7 +24,13 @@ class Device {
   late Directory pictureDir;
   late Directory? sdcard;
 
+  bool initData = false;
+
   void init(BuildContext context) async {
+    if(initData) {
+      return;
+    }
+    initData = true;
     var size = MediaQuery
         .of(context)
         .size;

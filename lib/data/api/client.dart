@@ -46,6 +46,12 @@ class Client {
     return RespImage.fromJson(resp.data);
   }
 
+  Future<RespImage> imageBySearch(String key,int page, int size) async{
+    var resp = await dio.get("images",
+        queryParameters: {"search": key, "page": page, "size": size});
+    return RespImage.fromJson(resp.data);
+  }
+
   Future<RespTagsByImageId> tagsByImageId(int imageId) async {
     var resp = await dio
         .get("tags_by_image_id", queryParameters: {"imageId": imageId});

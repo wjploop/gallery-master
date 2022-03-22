@@ -23,38 +23,6 @@ class _ItemImageState extends State<ItemImage> {
   void initState() {
     super.initState();
     isActive = true;
-
-    // Client().tagsByImageId(widget.imageModel.id!).then((value) {
-    //   value.data?.forEach((t) {
-    //     var tag = Container(
-    //       margin: EdgeInsets.symmetric(horizontal: 6),
-    //       child: TextButton(
-    //           style: ButtonStyle(
-    //               shape: MaterialStateProperty.resolveWith((states) =>
-    //                   RoundedRectangleBorder(
-    //                       borderRadius: BorderRadius.circular(18))),
-    //               backgroundColor: MaterialStateProperty.resolveWith(
-    //                   (states) => Colors.white.withOpacity(0.5))),
-    //           onPressed: () {
-    //             Navigator.of(context).pushNamedAndRemoveUntil(
-    //                 ImageByTagScreen.routeName, ModalRoute.withName('/'),
-    //                 arguments: Tag.instance(t.id, t.name));
-    //           },
-    //           child: Text(
-    //             t.name!,
-    //             textAlign: TextAlign.center,
-    //             style: TextStyle(
-    //                 fontSize: 12,
-    //                 backgroundColor: Colors.grey.withOpacity(0.5),
-    //                 color: Colors.white),
-    //           )),
-    //     );
-    //     tags.add(tag);
-    //     if (isActive) {
-    //       setState(() {});
-    //     }
-    //   });
-    // });
   }
 
   @override
@@ -78,7 +46,6 @@ class _ItemImageState extends State<ItemImage> {
           children: [
             Hero(
                 tag: widget.imageModel.id!,
-
                 child: ClipRRect(borderRadius: BorderRadius.all(Radius.circular(6)), child: MyCacheImage(url: imageUrl))),
             Stack(alignment: Alignment.bottomCenter, children: [
               Positioned(
