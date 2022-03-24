@@ -22,6 +22,7 @@ class _ImageBySearchPageState extends State<ImageBySearchPage> {
 
   bool hasMore = true;
   int page = 0;
+  bool loading = false;
 
   late TextEditingController _editingController;
   bool showDelete = false;
@@ -65,7 +66,7 @@ class _ImageBySearchPageState extends State<ImageBySearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: Focus(
             onFocusChange: (focus) {
@@ -73,15 +74,14 @@ class _ImageBySearchPageState extends State<ImageBySearchPage> {
             },
             child: Hero(
                 tag: "search",
-
                 flightShuttleBuilder: (flightContext, animation, flightDirection, fromHeroContext, toHeroContext) {
                   logger.i("anim status :" + animation.status.toString());
                   animation.addStatusListener((status) {
                     if (status == AnimationStatus.completed) {
                       _focusNode.requestFocus();
                     }
-                   });
-                  return  Center(
+                  });
+                  return Center(
                     child: Material(
                       color: Colors.transparent,
                       child: SizedBox(
@@ -104,7 +104,7 @@ class _ImageBySearchPageState extends State<ImageBySearchPage> {
                               ),
                               contentPadding: EdgeInsets.zero,
                               hintText: "搜索",
-                              hintStyle: TextStyle(fontSize :14,color: Colors.white24),
+                              hintStyle: TextStyle(fontSize: 14, color: Colors.white24),
                               suffixIcon: AnimatedOpacity(
                                   opacity: showDelete ? 1 : 0,
                                   duration: Duration(milliseconds: 200),
@@ -232,26 +232,39 @@ class _ImageBySearchPageState extends State<ImageBySearchPage> {
 
   var lastSearch = "";
 
-  void getData() async {
+  Future? _future;
+
+  Future getData() async {
+
+    if(page == 0) {
+      loading = false;
+      hasMore = true;
+    }
+    if(loading || !hasMore) {
+      return;
+    }
+    loading = true;
     setState(() {
-      if(page == 0) {
-        if(lastSearch != _editingController.text.trim()) {
+      if (page == 0) {
+        if (lastSearch != _editingController.text.trim()) {
           status = SearchStatus.searching;
         }
       }
     });
-    Client().imageBySearch(_editingController.text.trim(), page, 15).then((value) {
+    _future = Client().imageBySearch(_editingController.text.trim(), page, 15).then((value) {
       if (page == 0) {
         lastSearch = _editingController.text.trim();
         items.clear();
         status = value.data!.content!.isEmpty ? SearchStatus.no_result : SearchStatus.show_data;
-      }else{
+      } else {
         status = SearchStatus.show_data;
       }
       items.addAll(value.data!.content!);
       hasMore = !value.data!.last!;
       page++;
       setState(() {});
+    }).whenComplete(()  {
+      loading = false;
     });
   }
 }

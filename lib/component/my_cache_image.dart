@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:gallery/data/model/my_cache_manger.dart';
 
 import '../data/model/device.dart';
@@ -13,7 +14,10 @@ class MyCacheImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) => CachedNetworkImage(
-        placeholder: ((context, url) => Image.asset("assets/images/loading.gif")),
+        placeholder: ((context, url) =>
+            // Image.asset("assets/images/loading.gif"),
+        Container(color: Theme.of(context).primaryColor)
+        ),
         imageUrl: url,
         // width: constraints.maxWidth,
         // height: constraints.maxWidth / Device().aspectRatio,

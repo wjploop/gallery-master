@@ -48,7 +48,6 @@ class Device {
     logger.i("doc dir: $appDir");
     logger.i("picture dir: $pictureDir");
     logger.i("sdcard dir: $sdcard");
-
   }
 
   Device._() {}

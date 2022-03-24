@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gallery/data/model/Upgrader.dart';
 import 'package:gallery/data/model/image_map_model.dart';
 import 'package:gallery/page/home.dart';
 import 'package:gallery/route/fade_route.dart';
@@ -22,25 +23,35 @@ void main() {
     Provider(
       create: (context) => ImagePageMapModel(),
     )
-  ], child: const MyApp()));
+  ], child: const App()));
 }
 
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class App extends StatefulWidget {
+  const App({Key? key}) : super(key: key);
 
-  
+  @override
+  _AppState createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-        secondaryHeaderColor: Colors.orange,
-        iconTheme: IconThemeData(color: Colors.white70)
+          primarySwatch: Colors.deepPurple,
+          secondaryHeaderColor: Colors.orange,
+          iconTheme: IconThemeData(color: Colors.white70)
       ),
-      home: Home(),
+      home: Upgrader(child: Home()),
       routes: {
         Routes.image_by_tag.name: (context) => ScreenImageByTag(),
         // Routes.image_by_search.name: (context) => ScreenImageBySearch(),
@@ -49,10 +60,11 @@ class MyApp extends StatelessWidget {
       onGenerateRoute: (settings) {
         if (settings.name == Routes.image_full_screen.name) {
           return FadeRoute(settings: settings, builder: (context) => ScreenFullImage());
-        }else if(settings.name == Routes.image_by_search.name) {
+        } else if (settings.name == Routes.image_by_search.name) {
           return FadeRoute(settings: settings, builder: (context) => ScreenImageBySearch());
         }
       },
     );
   }
 }
+
