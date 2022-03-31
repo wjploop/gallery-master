@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:gallery/util/logger.dart';
 import 'package:my_plugin/my_plugin.dart';
 import 'package:my_plugin/screen_info.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Device {
@@ -26,6 +27,8 @@ class Device {
 
   bool initData = false;
 
+  late PackageInfo packageInfo;
+
   void init(BuildContext context) async {
     if(initData) {
       return;
@@ -45,6 +48,7 @@ class Device {
     appDir = await getApplicationDocumentsDirectory();
     pictureDir = (await getExternalStorageDirectories(type: StorageDirectory.pictures))!.first;
     sdcard = await getExternalStorageDirectory();
+    packageInfo = await PackageInfo.fromPlatform();
     logger.i("doc dir: $appDir");
     logger.i("picture dir: $pictureDir");
     logger.i("sdcard dir: $sdcard");

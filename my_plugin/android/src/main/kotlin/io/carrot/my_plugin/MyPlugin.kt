@@ -85,7 +85,28 @@ class MyPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val path = argus["path"] as String
                 share(path)
             }
+            "installApk" -> {
+                val argus = call.arguments as Map<String, Any>
+                val path = argus["path"] as String
+                installApk(path)
+            }
             else -> result.notImplemented()
+        }
+    }
+
+    private fun installApk(path: String) {
+        val file = File(path)
+        var uri = Uri.fromFile(file)
+        if (Build.VERSION.SDK_INT >= 24) {
+            uri = FileProvider.getUriForFile(activity, activity.packageName, file)
+        }
+        Intent(Intent.ACTION_VIEW, uri).apply {
+            putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+            setDataAndType(uri, "application/vnd.android.package-archive")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            activity.startActivity(this)
+
         }
     }
 
@@ -159,7 +180,10 @@ class MyPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         Log.d(TAG, "start share $path")
         Intent(Intent.ACTION_SEND).apply {
             type = "image/*"
-            putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(activity,activity.packageName,File(path)))
+            putExtra(
+                Intent.EXTRA_STREAM,
+                FileProvider.getUriForFile(activity, activity.packageName, File(path))
+            )
             activity.startActivity(this)
             Log.d(TAG, "share")
         }

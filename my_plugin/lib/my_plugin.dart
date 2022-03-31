@@ -33,8 +33,10 @@ class MyPlugin {
   }
 
   static void share(String path) {
-    _channel.invokeMethod("share",{
-      "path": path
-    });
+    _channel.invokeMethod("share", {"path": path});
+  }
+
+  static void installApp(String path) {
+    _channel.invokeMethod("installApk", {"path": path});
   }
 }

@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery/data/entity/resp_upgrade.dart';
+import 'package:gallery/data/model/device.dart';
 import 'package:gallery/util/logger.dart';
+import 'package:my_plugin/my_plugin.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../api/client.dart';
@@ -18,57 +20,121 @@ class Upgrader extends StatefulWidget {
 }
 
 class _UpgraderState extends State<Upgrader> {
-  bool startDownload = false;
   double downloadValue = 0;
+
+  UpgradeStatus status = UpgradeStatus.showUpdate;
+
+  var apkPath = "";
 
   @override
   void initState() {
     super.initState();
     Client().appVersion().then((value) {
-      logger.i("show version $value");
+      logger.i("version data: $value");
       Version version = value.data!;
+      status = UpgradeStatus.showUpdate;
+
+      int currentVersionCode = int.parse(Device().packageInfo.buildNumber);
+      logger.i("version current: $currentVersionCode , server version: ${version.versionCode}");
+      if (version.versionCode! <= currentVersionCode) {
+        return;
+      }
       showDialog(
         barrierDismissible: false,
         context: context,
         builder: (context) => StatefulBuilder(builder: (context, setState) {
-          return AlertDialog(
-            title: Text("有新版本更新"),
-            content: Row(
-              children: [Text("新版本:${version.versionName}"), Text("通知:${version.notice}")],
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("忽略")),
-              TextButton(
-                  onPressed: () async {
-                    logger.i("apk url : ${version.apkUrl}");
-                    var path = (await getTemporaryDirectory()).path + "/" + "app_${version.versionCode}.apk";
-                    setState(() {
-                      startDownload = true;
-                    });
-                    await Client().shareDio.downloadUri(Uri.parse(version.apkUrl!), path,options: Options(
-                      contentType: ContentType.binary.mimeType,
-                      headers: {
-
-                      }
-                    ), onReceiveProgress: (count, total) {
-                      logger.i("download process $count / $total");
-                      double process = count / total;
+          return WillPopScope(
+            onWillPop: () async {
+              return false;
+            },
+            child: AlertDialog(
+              title: Text(
+                "发现新版本",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              content: Wrap(
+                children: [
+                  Column(
+                    children: [
+                      Visibility(visible: status == UpgradeStatus.showUpdate, child: Text("${version.notice?.replaceAll("\\n", "\n")},")),
+                      Visibility(
+                        visible: status.index >= UpgradeStatus.downloading.index,
+                        child: Container(
+                          padding: EdgeInsets.only(left: 20, right: 20),
+                          child: Stack(
+                            children: [
+                              Visibility(
+                                  visible: status == UpgradeStatus.downloading,
+                                  child: Center(
+                                    child: Column(
+                                      children: [
+                                        Text("下载中，请稍候~"),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        LinearProgressIndicator(
+                                          value: downloadValue,
+                                        ),
+                                      ],
+                                    ),
+                                  )),
+                              Visibility(visible: status == UpgradeStatus.completed_downloaded, child: Text("下载完成啦～"))
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                Visibility(
+                  visible: status == UpgradeStatus.showUpdate && !version.forceUpgrade!,
+                  child: TextButton(
+                    child: Text("下次"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+                Visibility(
+                  visible: status == UpgradeStatus.showUpdate,
+                  child: TextButton(
+                    child: Text("急速更新"),
+                    onPressed: () async {
+                      logger.i("apk url : ${version.apkUrl}");
+                      apkPath = (await getTemporaryDirectory()).path + "/" + "app_${version.versionCode}.apk";
                       setState(() {
-                        downloadValue = process;
+                        status = UpgradeStatus.downloading;
                       });
-                    },);
-                  },
-                  child: Text("更新")),
-              Visibility(
-                  visible: startDownload,
-                  child: LinearProgressIndicator(
-                    value: downloadValue,
-                  ))
-            ],
+                      await Client().shareDio.downloadUri(
+                        Uri.parse(version.apkUrl!),
+                        apkPath,
+                        options: Options(),
+                        onReceiveProgress: (count, total) {
+                          logger.i("download process $count / $total");
+                          double process = count / total;
+                          setState(() {
+                            downloadValue = process;
+                          });
+                          if (count == total) {
+                            status = UpgradeStatus.completed_downloaded;
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ),
+                Visibility(
+                    visible: status == UpgradeStatus.completed_downloaded,
+                    child: TextButton(
+                      child: Text("开始安装"),
+                      onPressed: () {
+                        MyPlugin.installApp(apkPath);
+                      },
+                    ))
+              ],
+            ),
           );
         }),
       );
@@ -81,4 +147,10 @@ class _UpgraderState extends State<Upgrader> {
       child: widget.child,
     );
   }
+}
+
+enum UpgradeStatus {
+  showUpdate,
+  downloading,
+  completed_downloaded,
 }

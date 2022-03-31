@@ -27,6 +27,10 @@ class RespUpgrade {
     return map;
   }
 
+  @override
+  String toString() {
+    return 'RespUpgrade{code: $code, msg: $msg, data: $data}';
+  }
 }
 
 /// id : 1
@@ -76,4 +80,8 @@ class Version {
     return map;
   }
 
+  @override
+  String toString() {
+    return 'Version{id: $id, versionCode: $versionCode, versionName: $versionName, forceUpgrade: $forceUpgrade, apkUrl: $apkUrl, notice: $notice, insertAt: $insertAt}';
+  }
 }
