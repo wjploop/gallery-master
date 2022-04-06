@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gallery/component/search_history_compoment.dart';
+import 'package:gallery/component/search_text_filed.dart';
 import 'package:gallery/data/model/ImagePageModel.dart';
 
 import '../component/item_image.dart';
@@ -15,7 +17,7 @@ class ImageBySearchPage extends StatefulWidget {
 }
 
 class _ImageBySearchPageState extends State<ImageBySearchPage> {
-  var search = "";
+  var searchKey = "";
 
   List<ImageEntity> items = [];
   late ScrollController _scrollController;
@@ -29,13 +31,19 @@ class _ImageBySearchPageState extends State<ImageBySearchPage> {
 
   SearchStatus status = SearchStatus.init;
 
-  late FocusNode _focusNode;
+
+  GlobalKey<SearchHistoryWidgetState> historyKey = GlobalKey();
+
+  // add extra key enable textFiled widget would not unmount on hero animation
+  GlobalKey textFieldKey = GlobalKey();
+
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(() {
+      FocusScope.of(context).unfocus();
       if (_scrollController.offset > _scrollController.position.maxScrollExtent - 200) {
         getData();
       }
@@ -49,7 +57,6 @@ class _ImageBySearchPageState extends State<ImageBySearchPage> {
       });
     });
 
-    _focusNode = FocusNode();
 
     logger.i("init state");
   }
@@ -61,122 +68,57 @@ class _ImageBySearchPageState extends State<ImageBySearchPage> {
     debugPrint("hello");
   }
 
-  static int count = 0;
+
+  void search(String str){
+    if(str.isEmpty) {
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    page = 0;
+    getData();
+    historyKey.currentState?.add(str);
+
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Focus(
-            onFocusChange: (focus) {
-              logger.i("focus $focus");
-            },
-            child: Hero(
-                tag: "search",
-                flightShuttleBuilder: (flightContext, animation, flightDirection, fromHeroContext, toHeroContext) {
-                  logger.i("anim status :" + animation.status.toString());
-                  animation.addStatusListener((status) {
-                    if (status == AnimationStatus.completed) {
-                      _focusNode.requestFocus();
-                    }
-                  });
-                  return Center(
-                    child: Material(
-                      color: Colors.transparent,
-                      child: SizedBox(
-                        height: 36,
-                        child: TextField(
-                          textAlignVertical: TextAlignVertical.center,
-                          textInputAction: TextInputAction.search,
-                          controller: _editingController,
-                          style: TextStyle(color: Colors.white70),
-                          cursorColor: Colors.white70,
-                          autofocus: false,
-                          enabled: false,
-                          decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Theme.of(context).primaryColorDark,
-                              border: OutlineInputBorder(borderSide: BorderSide.none, borderRadius: BorderRadius.all(Radius.circular(30))),
-                              prefixIcon: Icon(
-                                Icons.search_rounded,
-                                color: Theme.of(context).iconTheme.color,
-                              ),
-                              contentPadding: EdgeInsets.zero,
-                              hintText: "搜索",
-                              hintStyle: TextStyle(fontSize: 14, color: Colors.white24),
-                              suffixIcon: AnimatedOpacity(
-                                  opacity: showDelete ? 1 : 0,
-                                  duration: Duration(milliseconds: 200),
-                                  child: GestureDetector(
-                                      onTap: () {
-                                        _editingController.clear();
-                                      },
-                                      child: Icon(
-                                        Icons.highlight_remove,
-                                        color: Theme.of(context).iconTheme.color,
-                                      ))),
-                              focusedBorder: null),
-                        ),
-                      ),
-                    ),
-                  );
+          centerTitle: false,
+          title: Hero(
+              tag: "search",
+              child: SearchTextFiled(
+                enable: true,
+                key: textFieldKey,
+                onSubmitted: (str) {
+                  search(str);
                 },
-                child: Builder(builder: (context) {
-                  logger.i("build ${++count}");
-                  return Center(
-                    child: Material(
-                      color: Colors.transparent,
-                      child: SizedBox(
-                        height: 36,
-                        child: TextField(
-                          focusNode: _focusNode,
-                          onSubmitted: (str) {
-                            page = 0;
-                            getData();
-                          },
-                          onChanged: (str) {},
-                          textAlignVertical: TextAlignVertical.center,
-                          textInputAction: TextInputAction.search,
-                          controller: _editingController,
-                          style: TextStyle(color: Colors.white70),
-                          cursorColor: Colors.white70,
-                          autofocus: false,
-                          decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Theme.of(context).primaryColorDark,
-                              border: OutlineInputBorder(borderSide: BorderSide.none, borderRadius: BorderRadius.all(Radius.circular(30))),
-                              prefixIcon: Icon(
-                                Icons.search_rounded,
-                                color: Theme.of(context).iconTheme.color,
-                              ),
-                              contentPadding: EdgeInsets.zero,
-                              hintText: "搜索",
-                              hintStyle: TextStyle(color: Colors.white24),
-                              suffixIcon: AnimatedOpacity(
-                                  opacity: showDelete ? 1 : 0,
-                                  duration: Duration(milliseconds: 200),
-                                  child: GestureDetector(
-                                      onTap: () {
-                                        _editingController.clear();
-                                      },
-                                      child: Icon(
-                                        Icons.highlight_remove,
-                                        color: Theme.of(context).iconTheme.color,
-                                      ))),
-                              focusedBorder: null),
-                        ),
-                      ),
-                    ),
-                  );
-                })),
-          ),
+                editingController: _editingController,
+              )),
+          actions: [
+            TextButton(
+              onPressed: () {
+                search(_editingController.text.trim());
+              },
+              child: Text(
+                "搜索",
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ],
         ),
         body: Builder(builder: (BuildContext context) {
           switch (status) {
             case SearchStatus.init:
-              return Center(
-                child: Text("init"),
+              return SearchHistoryWidget(
+                key: historyKey,
+                onSearch: (str){
+                  setState(() {
+                    _editingController.text =str;
+                  });
+                  search(str);
+                },
               );
             case SearchStatus.searching:
               return Center(
@@ -200,6 +142,7 @@ class _ImageBySearchPageState extends State<ImageBySearchPage> {
                                 imageModel: items[index],
                                 onTap: () {
                                   print('on tap $index');
+                                  FocusScope.of(context).unfocus();
                                   Navigator.of(context).pushNamed(Routes.image_full_screen.name, arguments: {"model": ImagePageModel(items, page, hasMore), "index": index});
                                 },
                               ),
@@ -235,12 +178,11 @@ class _ImageBySearchPageState extends State<ImageBySearchPage> {
   Future? _future;
 
   Future getData() async {
-
-    if(page == 0) {
+    if (page == 0) {
       loading = false;
       hasMore = true;
     }
-    if(loading || !hasMore) {
+    if (loading || !hasMore) {
       return;
     }
     loading = true;
@@ -252,6 +194,7 @@ class _ImageBySearchPageState extends State<ImageBySearchPage> {
       }
     });
     _future = Client().imageBySearch(_editingController.text.trim(), page, 15).then((value) {
+      logger.i(value);
       if (page == 0) {
         lastSearch = _editingController.text.trim();
         items.clear();
@@ -263,7 +206,7 @@ class _ImageBySearchPageState extends State<ImageBySearchPage> {
       hasMore = !value.data!.last!;
       page++;
       setState(() {});
-    }).whenComplete(()  {
+    }).whenComplete(() {
       loading = false;
     });
   }

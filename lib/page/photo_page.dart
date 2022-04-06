@@ -30,7 +30,6 @@ class PhotoPage extends StatefulWidget {
 class _PhotoPageState extends State<PhotoPage> {
   late PageController _controller;
 
-  List<Tag> tags = [];
 
   bool showDetail = false;
 
@@ -43,15 +42,15 @@ class _PhotoPageState extends State<PhotoPage> {
   }
 
   void getTags(int index) {
-    Client().tagsByImageId(widget.model.items[index].id!).then((value) {
-      if (mounted) {
-        setState(() {
-          tags.clear();
-          tags.addAll(value.data!);
-          logger.i("get tags $tags");
-        });
-      }
-    });
+    // Client().tagsByImageId(widget.model.items[index].id!).then((value) {
+    //   if (mounted) {
+    //     setState(() {
+    //       tags.clear();
+    //       tags.addAll(value.data!);
+    //       logger.i("get tags $tags");
+    //     });
+    //   }
+    // });
   }
 
   @override
@@ -216,7 +215,7 @@ class _PhotoPageState extends State<PhotoPage> {
                                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 40),
                                   scrollDirection: Axis.horizontal,
                                   child: Row(
-                                    children: tags
+                                    children: items[index].tags
                                         .map((e) => Container(
                                               margin: EdgeInsets.symmetric(horizontal: 6),
                                               child: Material(

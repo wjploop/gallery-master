@@ -4,6 +4,7 @@ import 'package:gallery/data/entity/resp_image.dart';
 import 'package:gallery/data/entity/resp_tag.dart';
 import 'package:gallery/data/entity/resp_tags_by_image_id.dart';
 import 'package:gallery/data/entity/resp_upgrade.dart';
+import 'package:gallery/util/prety_log_for_dio.dart';
 
 class Client {
   static final Client _client = Client._internal();
@@ -22,6 +23,7 @@ class Client {
     dio = Dio(BaseOptions(baseUrl: _domain, headers: {
       "Access-Control-Allow-Origin": "*",
     }));
+    dio.interceptors.add(PrettyDioLogger());
   }
 
   Future<RespUpgrade> appVersion() async {

@@ -1,3 +1,5 @@
+import 'package:gallery/data/entity/resp_tag.dart';
+
 /// code : 1000
 /// msg : "success"
 /// data : {"content":[{"id":173,"categoryId":10,"categoryName":"动物","originUrl":"http://img.netbian.com/file/2022/0119/small005527KyuJt1642524927.jpg","currentUrl":null,"type":"image"}],"pageable":{"sort":{"empty":true,"sorted":false,"unsorted":true},"offset":0,"pageNumber":0,"pageSize":10,"paged":true,"unpaged":false},"last":true,"totalPages":1,"totalElements":1,"size":10,"number":0,"sort":{"empty":true,"sorted":false,"unsorted":true},"first":true,"numberOfElements":1,"empty":false}
@@ -27,6 +29,11 @@ class RespImage {
       map['data'] = data?.toJson();
     }
     return map;
+  }
+
+  @override
+  String toString() {
+    return 'RespImage{code: $code, msg: $msg, data: $data}';
   }
 }
 
@@ -223,6 +230,7 @@ class ImageEntity {
     originUrl = json['originUrl'];
     currentUrl = json['currentUrl'];
     type = json['type'];
+    tags = fromTagStr(json['tags']);
   }
 
   int? id;
@@ -231,6 +239,7 @@ class ImageEntity {
   String? originUrl;
   String? currentUrl;
   String? type;
+  List<Tag> tags = [];
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -243,8 +252,23 @@ class ImageEntity {
     return map;
   }
 
+
+
   @override
   String toString() {
     return 'ImageModel{id: $id, categoryId: $categoryId, categoryName: $categoryName, originUrl: $originUrl, currentUrl: $currentUrl, type: $type}';
   }
+
+  List<Tag> fromTagStr(String json) {
+    List<Tag> tags = [];
+    json.split(",").forEach((e) {
+      var arr = e.split(":");
+      Tag tag = Tag(name :arr[1].replaceAll("\n", "").trim(),id: int.parse(arr[0]));
+      tags.add(tag);
+    });
+    return tags;
+  }
+
 }
+
+

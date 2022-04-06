@@ -9,6 +9,7 @@ import 'package:gallery/screen/routes.dart';
 import 'package:gallery/screen/screen_image_by_search.dart';
 import 'package:gallery/screen/screen_image_by_tag.dart';
 import 'package:gallery/screen/screen_image_full.dart';
+import 'package:gallery/screen/screen_upload_image.dart';
 import 'package:gallery/util/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
@@ -54,6 +55,7 @@ class _AppState extends State<App> {
       home: Upgrader(child: Home()),
       routes: {
         Routes.image_by_tag.name: (context) => ScreenImageByTag(),
+        Routes.upload_wallpaper.name:(context) => ScreenUploadImage(),
         // Routes.image_by_search.name: (context) => ScreenImageBySearch(),
         // Routes.image_full_screen.name: (context) => ScreenFullImage(),
       },
