@@ -47,6 +47,7 @@ class _ScreenUploadImageState extends State<ScreenUploadImage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text("上传壁纸"),
       ),
@@ -171,31 +172,84 @@ class _ScreenUploadImageState extends State<ScreenUploadImage> {
                 showDialog(
                     context: context,
                     builder: (context) {
-                      return Dialog(
-                        alignment: Alignment.bottomCenter,
-                        child: Material(
-                          child: Wrap(
-                            children: [
-                              ListTile(
-                                leading: Text("标签"),
-                                trailing: TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("确定"),
+                      print('tags ${tags}');
+                      TextEditingController _editingController = TextEditingController();
+
+                      List<String> copyTags = List.from(tags);
+                      return StatefulBuilder(
+                        builder: (context, _setState) => WillPopScope(
+                          onWillPop: () async {
+                            FocusScope.of(context).unfocus();
+                            if (FocusScope.of(context).hasFocus) {
+                              await Future.delayed(Duration(milliseconds: 200));
+                            }
+                            return true;
+                          },
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: AnimatedPadding(
+                              padding: MediaQuery.of(context).viewInsets,
+                              duration: Duration(milliseconds: 100),
+                              child: Material(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Wrap(
+                                    children: [
+                                      ListTile(
+                                        leading: Text("标签"),
+                                        trailing: TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: TextButton(
+                                              onPressed: () async{
+                                                FocusScope.of(context).unfocus();
+                                                if (FocusScope.of(context).hasFocus) {
+                                                  // await Future.delayed(Duration(milliseconds: 100));
+                                                }
+                                                setState(() {
+                                                  tags = List.from(copyTags);
+                                                });
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: Text("确定")),
+                                        ),
+                                      ),
+                                      MyDivider(),
+                                      SizedBox(
+                                        height: 15,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                        child: TagsWidget(
+                                            tags: copyTags,
+                                            onTap: (tag) {
+                                              _setState(() {
+                                                copyTags.remove(tag);
+                                              });
+                                            }),
+                                      ),
+                                      TextField(
+                                        controller: _editingController,
+                                        textInputAction: TextInputAction.next,
+                                        onEditingComplete: () {
+                                          _setState(() {
+                                            copyTags.add(_editingController.text);
+                                          });
+                                          _editingController.clear();
+                                        },
+                                        autofocus: true,
+                                        decoration: InputDecoration(
+                                          // hintText: "多行标签请用换行分割",
+                                          hintText: "${MediaQuery.of(context).viewInsets.bottom}",
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              tagsWidget(),
-                              TextField(
-                                onSubmitted: (str) {
-                                  setState(() {
-                                    tags.add(str);
-                                  });
-                                },
-                                autofocus: true,
-                                decoration: InputDecoration(hintText: "多行标签请用换行分割"),
-                              )
-                            ],
+                            ),
                           ),
                         ),
                       );
@@ -204,26 +258,58 @@ class _ScreenUploadImageState extends State<ScreenUploadImage> {
               leading: Icon(Icons.tag),
               title: Text("添加标签"),
               trailing: Icon(Icons.keyboard_arrow_right),
-              subtitle: tagsWidget(),
-            )
+            ),
+            SizedBox(
+              height: 4,
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: TagsWidget(
+                      tags: tags,
+                      onTap: (tag) {
+                        setState(() {
+                          tags.remove(tag);
+                        });
+                      })),
+            ),
           ],
         );
       }),
     );
   }
+}
 
-  Widget tagsWidget() {
+class TagsWidget extends StatelessWidget {
+  final List<String> tags;
+
+  final ValueChanged<String> onTap;
+
+  const TagsWidget({Key? key, required this.tags, required this.onTap}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Wrap(
+      spacing: 10,
+      alignment: WrapAlignment.start,
       children: tags
-          .map((e) => TextButton(
-              onPressed: () {
-                setState(() {
-                  tags.remove(e);
-                });
-              },
-              child: Row(
-                children: [Text(e), Icon(Icons.close)],
-              )))
+          .map((e) => Chip(
+        backgroundColor: Theme.of(context).primaryColor,
+                visualDensity: VisualDensity.compact,
+                label: Text(
+                  e,
+                  style: TextStyle(color: Colors.white),
+                ),
+                deleteIcon: Icon(
+                  Icons.close,
+                  size: 14,
+                  color: Colors.white,
+                ),
+                onDeleted: () {
+                  onTap(e);
+                },
+              ))
           .toList(),
     );
   }
