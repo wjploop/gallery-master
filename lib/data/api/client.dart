@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:gallery/data/entity/resp_category.dart';
 import 'package:gallery/data/entity/resp_image.dart';
 import 'package:gallery/data/entity/resp_tag.dart';
 import 'package:gallery/data/entity/resp_tags_by_image_id.dart';
 import 'package:gallery/data/entity/resp_upgrade.dart';
+import 'package:gallery/data/entity/resp_upload.dart';
 import 'package:gallery/util/prety_log_for_dio.dart';
 
 class Client {
@@ -16,11 +19,11 @@ class Client {
   late Dio dio;
   late Dio shareDio;
 
-  var _domain = "http://wjploop.xyz/";
+  static const String domain = "http://wjploop.xyz/";
 
   Client._internal() {
     shareDio = Dio();
-    dio = Dio(BaseOptions(baseUrl: _domain, headers: {
+    dio = Dio(BaseOptions(baseUrl: domain, headers: {
       "Access-Control-Allow-Origin": "*",
     }));
     dio.interceptors.add(PrettyDioLogger());
@@ -59,5 +62,15 @@ class Client {
   Future<RespTagsByImageId> tagsByImageId(int imageId) async {
     var resp = await dio.get("image/tags_by_image_id", queryParameters: {"imageId": imageId});
     return RespTagsByImageId.fromJson(resp.data);
+  }
+
+  Future<RespUpload> upload(int categoryId, String tagsName, List<File> files) async {
+    var resp = await dio.post("/image/user_upload",
+        data: FormData.fromMap({
+          "categoryId": categoryId,
+          "tagsName": tagsName,
+          "files": files.map((e) => MultipartFile.fromFileSync(e.path, filename: e.path.split("/").last)).toList()
+        }));
+    return RespUpload.fromJson(resp.data);
   }
 }

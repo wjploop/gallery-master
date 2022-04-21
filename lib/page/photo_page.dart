@@ -102,7 +102,7 @@ class _PhotoPageState extends State<PhotoPage> {
                       child: ClipRRect(
                           borderRadius: BorderRadius.all(Radius.circular(Device().screenInfo.connerRadius / Device().devicePixelRatio)),
                           child: MyCacheImage(
-                            url: items[index].originUrl!,
+                            imageEntity: items[index],
                           )),
                     ),
                     Visibility(

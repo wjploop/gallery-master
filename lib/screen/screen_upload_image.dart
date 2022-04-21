@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gallery/data/entity/resp_category.dart';
+import 'package:gallery/data/entity/resp_upload.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
@@ -17,6 +18,10 @@ class ScreenUploadImage extends StatefulWidget {
   @override
   State<ScreenUploadImage> createState() => _ScreenUploadImageState();
 }
+
+enum UploadStatus { idle, uploading, upload_success, upload_failed }
+
+List<String> uploadText = ["idle", "上传中，请稍侯~", "上传成功", "上传失败"];
 
 class _ScreenUploadImageState extends State<ScreenUploadImage> {
   late ImagePicker _picker;
@@ -35,6 +40,8 @@ class _ScreenUploadImageState extends State<ScreenUploadImage> {
 
   bool agree = true;
 
+  UploadStatus uploadStatus = UploadStatus.idle;
+
   @override
   void initState() {
     super.initState();
@@ -50,342 +57,425 @@ class _ScreenUploadImageState extends State<ScreenUploadImage> {
     _fixedExtentScrollController.dispose();
   }
 
-  void submit(){
-    if(paths.isEmpty) {
-      Tip.info(context, "请添加上传的图片");
-      return;
-    }
-    if(currentCategory == null) {
-      Tip.info(context, "请为图片选择壁纸分类");
-      return;
-    }
-    if(agree == false) {
-      Tip.info(context, "同意《协议》方可上传哦");
-      return;
-    }
+  void submit() async {
+    // if (paths.isEmpty) {
+    //   Tip.info(context, "请添加上传的图片");
+    //   return;
+    // }
+    // if (currentCategory == null) {
+    //   Tip.info(context, "请为图片选择壁纸分类");
+    //   return;
+    // }
+    // if (agree == false) {
+    //   Tip.info(context, "同意《协议》方可上传哦");
+    //   return;
+    // }
+    setState(() {
+      setState(() {
+        uploadStatus = UploadStatus.uploading;
+      });
+    });
+    // RespUpload respUpload = await Client().upload(currentCategory!.id!, tags.join(", "), paths.map((e) => File(e)).toList());
+    await Future.delayed(Duration(seconds: 2));
 
+    setState(() {
+      uploadStatus = 1 == 10000 ? UploadStatus.upload_success : UploadStatus.upload_failed;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: Text("上传壁纸"),
-      ),
-      body: Builder(builder: (context) {
-        return Stack(
-          children: [
-            Column(
+    return Stack(
+      children: [
+        Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            title: Text("上传壁纸"),
+          ),
+          body: Builder(builder: (context) {
+            return Stack(
               children: [
-                SizedBox(
-                  height: 12,
-                ),
-                SizedBox(
-                  height: 200,
-                  child: CustomScrollView(
-                    scrollDirection: Axis.horizontal,
-                    slivers: [
-                      SliverList(
-                          delegate: SliverChildBuilderDelegate((context, index) {
-                        return Dismissible(
-                          key: Key(paths[index]),
-                          direction: DismissDirection.down,
-                          onDismissed: (dir) {
-                            setState(() {
-                              paths.removeAt(index);
-                            });
-                          },
-                          background: Container(
-                            color: Colors.red,
-                            child: Icon(Icons.delete),
-                          ),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 4),
-                            width: 120,
-                            child: Image.file(
-                              File(paths[index]),
-                              fit: BoxFit.fitWidth,
-                            ),
-                          ),
-                        );
-                      }, childCount: paths.length)),
-                      SliverToBoxAdapter(
-                        child: Visibility(
-                          visible: paths.length < 9,
-                          child: Container(
-                            width: 120,
-                            padding: EdgeInsets.symmetric(horizontal: 4),
-                            child: IconButton(
-                              padding: EdgeInsets.zero,
-                              onPressed: () async {
-                                var files = await _picker.pickMultiImage();
-                                if (files != null && files.isNotEmpty) {
-                                  files.map((e) => e.path).forEach((path) {
-                                    setState(() {
-                                      paths.add(path);
-                                    });
-                                  });
-                                }
+                Column(
+                  children: [
+                    SizedBox(
+                      height: 12,
+                    ),
+                    SizedBox(
+                      height: 200,
+                      child: CustomScrollView(
+                        scrollDirection: Axis.horizontal,
+                        slivers: [
+                          SliverList(
+                              delegate: SliverChildBuilderDelegate((context, index) {
+                            return Dismissible(
+                              key: Key(paths[index]),
+                              direction: DismissDirection.down,
+                              onDismissed: (dir) {
+                                setState(() {
+                                  paths.removeAt(index);
+                                });
                               },
-                              icon: Container(color: Theme.of(context).primaryColor, width: double.maxFinite, height: double.maxFinite, child: Icon(Icons.add)),
-                              color: Colors.white,
-                              iconSize: 60,
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      child: Text(
-                        "已选图片(${paths.length}/9)",
-                        style: TextStyle(fontSize: 10),
-                      )),
-                ),
-                MyDivider(),
-                ListTile(
-                  onTap: () {
-                    showModalBottomSheet(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
-                        context: context,
-                        builder: (context) => Wrap(
-                              children: [
-                                ListTile(
-                                  leading: Text(
-                                    "壁纸分类",
-                                    style: Theme.of(context).textTheme.titleMedium,
-                                  ),
-                                  trailing: TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        currentCategory = categories[pickerPos];
-                                      });
-                                      Navigator.pop(context);
-                                    },
-                                    child: Text("确定"),
-                                  ),
+                              background: Container(
+                                color: Colors.red,
+                                child: Icon(Icons.delete),
+                              ),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 4),
+                                width: 120,
+                                child: Image.file(
+                                  File(paths[index]),
+                                  fit: BoxFit.fitWidth,
                                 ),
-                                MyDivider(),
-                                SizedBox(
-                                    height: 300,
-                                    child: CupertinoPicker(
-                                        itemExtent: 35,
-                                        onSelectedItemChanged: (pos) {
-                                          pickerPos = pos;
+                              ),
+                            );
+                          }, childCount: paths.length)),
+                          SliverToBoxAdapter(
+                            child: Visibility(
+                              visible: paths.length < 9,
+                              child: Container(
+                                width: 120,
+                                padding: EdgeInsets.symmetric(horizontal: 4),
+                                child: IconButton(
+                                  padding: EdgeInsets.zero,
+                                  onPressed: () async {
+                                    var files = await _picker.pickMultiImage();
+                                    if (files != null && files.isNotEmpty) {
+                                      files.map((e) => e.path).forEach((path) {
+                                        setState(() {
+                                          paths.add(path);
+                                        });
+                                      });
+                                    }
+                                  },
+                                  icon: Container(color: Theme.of(context).primaryColor, width: double.maxFinite, height: double.maxFinite, child: Icon(Icons.add)),
+                                  color: Colors.white,
+                                  iconSize: 60,
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          child: Text(
+                            "已选图片(${paths.length}/9)",
+                            style: TextStyle(fontSize: 10),
+                          )),
+                    ),
+                    MyDivider(),
+                    ListTile(
+                      onTap: () {
+                        showModalBottomSheet(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+                            context: context,
+                            builder: (context) => Wrap(
+                                  children: [
+                                    ListTile(
+                                      leading: Text(
+                                        "壁纸分类",
+                                        style: Theme.of(context).textTheme.titleMedium,
+                                      ),
+                                      trailing: TextButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            currentCategory = categories[pickerPos];
+                                          });
+                                          Navigator.pop(context);
                                         },
-                                        children: categories
-                                            .map((e) => Text(
-                                                  e.name!,
-                                                ))
-                                            .toList())),
-                              ],
-                            ));
-                  },
-                  leading: Icon(Icons.category),
-                  title: Text("壁纸分类"),
-                  trailing: Wrap(
-                    children: [
-                      Text("${currentCategory == null ? "" : currentCategory!.name}"),
-                      Icon(Icons.keyboard_arrow_right),
-                    ],
-                  ),
-                ),
-                MyDivider(),
-                ListTile(
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          print('tags ${tags}');
-                          TextEditingController _editingController = TextEditingController();
+                                        child: Text("确定"),
+                                      ),
+                                    ),
+                                    MyDivider(),
+                                    SizedBox(
+                                        height: 300,
+                                        child: CupertinoPicker(
+                                            itemExtent: 35,
+                                            onSelectedItemChanged: (pos) {
+                                              pickerPos = pos;
+                                            },
+                                            children: categories
+                                                .map((e) => Text(
+                                                      e.name!,
+                                                    ))
+                                                .toList())),
+                                  ],
+                                ));
+                      },
+                      leading: Icon(Icons.category),
+                      title: Text("壁纸分类"),
+                      trailing: Wrap(
+                        children: [
+                          Text("${currentCategory == null ? "" : currentCategory!.name}"),
+                          Icon(Icons.keyboard_arrow_right),
+                        ],
+                      ),
+                    ),
+                    MyDivider(),
+                    ListTile(
+                      onTap: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              print('tags ${tags}');
+                              TextEditingController _editingController = TextEditingController();
 
-                          List<String> copyTags = List.from(tags);
-                          return StatefulBuilder(
-                            builder: (context, _setState) => WillPopScope(
-                              onWillPop: () async {
-                                FocusScope.of(context).unfocus();
-                                if (FocusScope.of(context).hasFocus) {
-                                  await Future.delayed(Duration(milliseconds: 200));
-                                }
-                                return true;
-                              },
-                              child: Align(
-                                alignment: Alignment.bottomCenter,
-                                child: AnimatedPadding(
-                                  padding: MediaQuery.of(context).viewInsets,
-                                  duration: Duration(milliseconds: 100),
-                                  child: Material(
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
-                                    child: Wrap(
-                                      children: [
-                                        Stack(
+                              List<String> copyTags = List.from(tags);
+                              return StatefulBuilder(
+                                builder: (context, _setState) => WillPopScope(
+                                  onWillPop: () async {
+                                    FocusScope.of(context).unfocus();
+                                    if (FocusScope.of(context).hasFocus) {
+                                      await Future.delayed(Duration(milliseconds: 200));
+                                    }
+                                    return true;
+                                  },
+                                  child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: AnimatedPadding(
+                                      padding: MediaQuery.of(context).viewInsets,
+                                      duration: Duration(milliseconds: 100),
+                                      child: Material(
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+                                        child: Wrap(
                                           children: [
-                                            Positioned.fill(
-                                              child: Align(
-                                                  alignment: Alignment.centerLeft,
+                                            Stack(
+                                              children: [
+                                                Positioned.fill(
+                                                  child: Align(
+                                                      alignment: Alignment.centerLeft,
+                                                      child: Padding(
+                                                        padding: const EdgeInsets.only(left: 16),
+                                                        child: Wrap(
+                                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                                          children: [
+                                                            Text(
+                                                              "标签",
+                                                              style: Theme.of(context).textTheme.titleMedium,
+                                                            ),
+                                                            SizedBox(
+                                                              width: 15,
+                                                            ),
+                                                            Text(
+                                                              "已添加（${copyTags.length}/5）",
+                                                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      )),
+                                                ),
+                                                Align(
+                                                  alignment: Alignment.centerRight,
                                                   child: Padding(
-                                                    padding: const EdgeInsets.only(left: 16),
-                                                    child: Wrap(
-                                                      crossAxisAlignment: WrapCrossAlignment.center,
-                                                      children: [
-                                                        Text(
-                                                          "标签",
-                                                          style: Theme.of(context).textTheme.titleMedium,
-                                                        ),
-                                                        SizedBox(
-                                                          width: 15,
-                                                        ),
-                                                        Text(
-                                                          "已添加（${copyTags.length}/5）",
-                                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  )),
+                                                    padding: const EdgeInsets.only(right: 8.0),
+                                                    child: TextButton(
+                                                        onPressed: () async {
+                                                          FocusScope.of(context).unfocus();
+                                                          if (FocusScope.of(context).hasFocus) {
+                                                            // await Future.delayed(Duration(milliseconds: 100));
+                                                          }
+                                                          setState(() {
+                                                            tags = List.from(copyTags);
+                                                          });
+                                                          Navigator.of(context).pop();
+                                                        },
+                                                        child: Text("确定")),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            Align(
-                                              alignment: Alignment.centerRight,
-                                              child: Padding(
-                                                padding: const EdgeInsets.only(right: 8.0),
-                                                child: TextButton(
-                                                    onPressed: () async {
-                                                      FocusScope.of(context).unfocus();
-                                                      if (FocusScope.of(context).hasFocus) {
-                                                        // await Future.delayed(Duration(milliseconds: 100));
-                                                      }
-                                                      setState(() {
-                                                        tags = List.from(copyTags);
-                                                      });
-                                                      Navigator.of(context).pop();
-                                                    },
-                                                    child: Text("确定")),
+                                            MyDivider(),
+                                            SizedBox(
+                                              height: 15,
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                              child: TagsWidget(
+                                                  tags: copyTags,
+                                                  onTap: (tag) {
+                                                    _setState(() {
+                                                      copyTags.remove(tag);
+                                                    });
+                                                  }),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                                              child: TextField(
+                                                controller: _editingController,
+                                                textInputAction: TextInputAction.next,
+                                                onEditingComplete: () {
+                                                  _setState(() {
+                                                    if (copyTags.length < 5) {
+                                                      copyTags.add(_editingController.text);
+                                                      _editingController.clear();
+                                                    } else {
+                                                      showTopSnackBar(context, CustomSnackBar.info(message: "最多可以添加5个标签"));
+                                                    }
+                                                  });
+                                                },
+                                                autofocus: true,
+                                                inputFormatters: [
+                                                  LengthLimitingTextInputFormatter(8),
+                                                ],
+                                                decoration: InputDecoration(
+                                                  hintText: "多行标签请用换行分割",
+                                                  border: InputBorder.none,
+                                                ),
                                               ),
                                             ),
                                           ],
                                         ),
-                                        MyDivider(),
-                                        SizedBox(
-                                          height: 15,
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                          child: TagsWidget(
-                                              tags: copyTags,
-                                              onTap: (tag) {
-                                                _setState(() {
-                                                  copyTags.remove(tag);
-                                                });
-                                              }),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                                          child: TextField(
-                                            controller: _editingController,
-                                            textInputAction: TextInputAction.next,
-                                            onEditingComplete: () {
-                                              _setState(() {
-                                                if (copyTags.length < 5) {
-                                                  copyTags.add(_editingController.text);
-                                                  _editingController.clear();
-                                                } else {
-                                                  showTopSnackBar(context, CustomSnackBar.info(message: "最多可以添加5个标签"));
-                                                }
-                                              });
-                                            },
-                                            autofocus: true,
-                                            inputFormatters: [
-                                              LengthLimitingTextInputFormatter(8),
-                                            ],
-                                            decoration: InputDecoration(
-                                              hintText: "多行标签请用换行分割",
-                                              border: InputBorder.none,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          );
-                        });
-                  },
-                  leading: Icon(Icons.tag),
-                  title: Text("添加标签"),
-                  trailing: Icon(Icons.keyboard_arrow_right),
-                ),
-                SizedBox(
-                  height: 4,
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: TagsWidget(
-                          tags: tags,
-                          onTap: (tag) {
-                            setState(() {
-                              tags.remove(tag);
+                              );
                             });
-                          })),
-                ),
-              ],
-            ),
-            Positioned.fill(
-                child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                margin: EdgeInsets.only(bottom: 30),
-                child: Wrap(
-                  children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Checkbox(
-                            visualDensity: VisualDensity.compact,
-                            shape: CircleBorder(),
-                            value: agree,
-                            onChanged: (b) {
-                              setState(() {
-                                agree = b ?? false;
-                              });
-                            },
-                          ),
-                          Text("我已同意并阅读 "),
-                          Text(
-                            "协议",
-                            style: TextStyle(color: Theme.of(context).primaryColor),
-                          ),
-                        ],
-                      ),
+                      },
+                      leading: Icon(Icons.tag),
+                      title: Text("添加标签"),
+                      trailing: Icon(Icons.keyboard_arrow_right),
                     ),
                     SizedBox(
-                      height: 15,
+                      height: 4,
                     ),
-                    GestureDetector(
-                      onTap: submit,
-                      child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: 30),
-                          width: double.maxFinite,
-                          height: 40,
-                          decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.all(Radius.circular(16))),
-                          child: Center(child: Text("提交审核",style: TextStyle(color: Colors.white,fontSize: 18),),)),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: TagsWidget(
+                              tags: tags,
+                              onTap: (tag) {
+                                setState(() {
+                                  tags.remove(tag);
+                                });
+                              })),
                     ),
                   ],
                 ),
+                Positioned.fill(
+                    child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    margin: EdgeInsets.only(bottom: 30),
+                    child: Wrap(
+                      children: [
+                        Align(
+                          alignment: Alignment.center,
+                          child: Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Checkbox(
+                                visualDensity: VisualDensity.compact,
+                                shape: CircleBorder(),
+                                value: agree,
+                                onChanged: (b) {
+                                  setState(() {
+                                    agree = b ?? false;
+                                  });
+                                },
+                              ),
+                              Text("我已同意并阅读 "),
+                              Text(
+                                "协议",
+                                style: TextStyle(color: Theme.of(context).primaryColor),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        GestureDetector(
+                          onTap: submit,
+                          child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 30),
+                              width: double.maxFinite,
+                              height: 40,
+                              decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.all(Radius.circular(16))),
+                              child: Center(
+                                child: Text(
+                                  "提交审核",
+                                  style: TextStyle(color: Colors.white, fontSize: 18),
+                                ),
+                              )),
+                        ),
+                      ],
+                    ),
+                  ),
+                )),
+              ],
+            );
+          }),
+        ),
+        Positioned.fill(
+          child: WillPopScope(
+            onWillPop:  () async {
+              if(uploadStatus == UploadStatus.idle) {
+                return true;
+              }else{
+                if(uploadStatus != UploadStatus.uploading) {
+                  setState(() {
+                    uploadStatus = UploadStatus.idle;
+                  });
+                }
+                return false;
+              }
+            },
+            child: AnimatedOpacity(
+              opacity: uploadStatus != UploadStatus.idle ? 1 : 0,
+              duration: Duration(milliseconds: 300),
+              child: IgnorePointer(
+                child: Container(
+                  color: Theme.of(context).shadowColor.withOpacity(0.5),
+                  child: Center(
+                    child: Container(
+                      color: Colors.deepPurpleAccent,
+                      margin: EdgeInsets.symmetric(horizontal: 50),
+                      child: Material(
+                        child: Wrap(
+                          direction: Axis.vertical,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(50.0),
+                              child: Text(uploadText[uploadStatus.index]),
+                            ),
+                            Opacity(
+                              opacity: uploadStatus.index > UploadStatus.uploading.index ? 1 : 0,
+                              child: TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    uploadStatus = UploadStatus.idle;
+                                  });
+                                },
+                                child: Container(
+                                    margin: EdgeInsets.symmetric(horizontal: 30),
+                                    width: double.maxFinite,
+                                    height: 40,
+                                    decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.all(Radius.circular(16))),
+                                    child: Center(
+                                      child: Text(
+                                        "确定",
+                                        style: TextStyle(color: Colors.white, fontSize: 18),
+                                      ),
+                                    )),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ))
-          ],
-        );
-      }),
+            ),
+          ),
+        )
+
+      ],
     );
   }
 }

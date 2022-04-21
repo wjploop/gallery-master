@@ -33,7 +33,6 @@ class _ItemImageState extends State<ItemImage> {
 
   @override
   Widget build(BuildContext context) {
-    var imageUrl = widget.imageModel.originUrl!;
     return Material(
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
@@ -46,7 +45,7 @@ class _ItemImageState extends State<ItemImage> {
           children: [
             Hero(
                 tag: widget.imageModel.id!,
-                child: ClipRRect(borderRadius: BorderRadius.all(Radius.circular(6)), child: MyCacheImage(url: imageUrl))),
+                child: ClipRRect(borderRadius: BorderRadius.all(Radius.circular(6)), child: MyCacheImage(imageEntity: widget.imageModel,))),
             Stack(alignment: Alignment.bottomCenter, children: [
               Positioned(
                 child: SingleChildScrollView(
